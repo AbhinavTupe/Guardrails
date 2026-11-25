@@ -1,0 +1,7 @@
+{
+  "vuln_shell.py": ["shell_exec"],
+  "vuln_poisoned.py": ["poisoned_description"],
+  "vuln_files.py": ["unrestricted_path", "file_write_delete"],
+  "clean_calc.py": [],
+  "clean_notes.py": []
+}
