@@ -22,6 +22,7 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "mcp_audit"
 module-root = ""
+source-include = ["mcp_audit/report/template.html"]
 
 [dependency-groups]
 dev = [

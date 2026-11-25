@@ -2,6 +2,7 @@
 
 import asyncio
 from collections import defaultdict
+from pathlib import Path
 
 import typer
 
@@ -9,6 +10,7 @@ from mcp_audit.connector import ConnectorError, enumerate_server
 from mcp_audit.kb.retriever import KeywordRetriever
 from mcp_audit.models import Finding, ScanResult
 from mcp_audit.probes import run_probes
+from mcp_audit.report.html import render_html
 from mcp_audit.rules import load_all_rules, run_rules
 from mcp_audit.rules.registry import get_rule_title
 from mcp_audit.scoring import score_findings
@@ -17,6 +19,7 @@ app = typer.Typer()
 PROBE_WARNING = (
     "Probes make harmless test calls to the target. Use only on servers you trust to run locally."
 )
+HTML_OPTION = typer.Option(None, "--html")
 
 
 @app.callback()
@@ -29,6 +32,7 @@ def scan(
     command: str,
     json_output: bool = typer.Option(False, "--json"),
     probe: bool = typer.Option(False, "--probe"),
+    html: Path | None = HTML_OPTION,
     fail_on: str = typer.Option("high", "--fail-on"),
 ) -> None:
     """Scan an MCP server launched by COMMAND."""
@@ -56,7 +60,10 @@ def scan(
         score=score_findings(findings),
     )
 
-    if json_output:
+    if html is not None:
+        html.write_text(render_html(result), encoding="utf-8")
+        typer.echo(f"Report written to {html}")
+    elif json_output:
         typer.echo(result.to_json())
     else:
         typer.echo(f"Server command: {result.server_command}")
