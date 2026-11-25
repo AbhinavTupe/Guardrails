@@ -1,10 +1,15 @@
 import json
+import shlex
+import sys
+from pathlib import Path
 
 from typer.testing import CliRunner
 
 from mcp_audit.cli import app
 
 runner = CliRunner()
+FIXTURE = Path(__file__).parent / "fixtures" / "echo_server.py"
+SERVER_COMMAND = shlex.join([sys.executable, str(FIXTURE)])
 
 
 def test_help_works() -> None:
@@ -14,16 +19,23 @@ def test_help_works() -> None:
 
 
 def test_scan_echo_exits_zero() -> None:
-    result = runner.invoke(app, ["scan", "echo hi"])
+    result = runner.invoke(app, ["scan", SERVER_COMMAND])
 
     assert result.exit_code == 0
 
 
 def test_scan_json_output_is_valid_json() -> None:
-    result = runner.invoke(app, ["scan", "--json", "echo hi"])
+    result = runner.invoke(app, ["scan", "--json", SERVER_COMMAND])
 
     assert result.exit_code == 0
     parsed = json.loads(result.stdout)
-    assert parsed["server_command"] == "echo hi"
-    assert parsed["tools"] == []
+    assert parsed["server_command"] == SERVER_COMMAND
+    assert {tool["name"] for tool in parsed["tools"]} == {"echo", "add"}
     assert parsed["findings"] == []
+
+
+def test_scan_connector_error_exits_two_with_one_line() -> None:
+    result = runner.invoke(app, ["scan", "mcp-audit-command-that-does-not-exist"])
+
+    assert result.exit_code == 2
+    assert len(result.output.strip().splitlines()) == 1

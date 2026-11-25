@@ -1,7 +1,10 @@
 """Command-line interface for mcp-audit."""
 
+import asyncio
+
 import typer
 
+from mcp_audit.connector import ConnectorError, enumerate_server
 from mcp_audit.models import ScanResult
 
 app = typer.Typer()
@@ -20,7 +23,14 @@ def scan(
 ) -> None:
     """Scan an MCP server launched by COMMAND."""
     del probe
-    result = ScanResult(server_command=command)
+    try:
+        server = asyncio.run(enumerate_server(command))
+    except ConnectorError as exc:
+        message = str(exc).replace("\r", " ").replace("\n", " ")
+        typer.echo(f"Error: {message}", err=True)
+        raise typer.Exit(code=2) from exc
+
+    result = ScanResult(server_command=command, tools=server.tools)
 
     if json_output:
         typer.echo(result.to_json())

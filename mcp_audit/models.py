@@ -20,6 +20,13 @@ class ToolInfo:
     input_schema: dict[str, object]
 
 
+@dataclass
+class ServerInfo:
+    tools: list[ToolInfo]
+    resources: list[str]
+    prompts: list[str]
+
+
 @dataclass(frozen=True)
 class Finding:
     rule_id: str
