@@ -6,6 +6,7 @@ import typer
 
 from mcp_audit.connector import ConnectorError, enumerate_server
 from mcp_audit.models import ScanResult
+from mcp_audit.rules import load_all_rules, run_rules
 
 app = typer.Typer()
 
@@ -30,7 +31,13 @@ def scan(
         typer.echo(f"Error: {message}", err=True)
         raise typer.Exit(code=2) from exc
 
-    result = ScanResult(server_command=command, tools=server.tools)
+    load_all_rules()
+    findings = run_rules(server.tools)
+    result = ScanResult(
+        server_command=command,
+        tools=server.tools,
+        findings=findings,
+    )
 
     if json_output:
         typer.echo(result.to_json())
