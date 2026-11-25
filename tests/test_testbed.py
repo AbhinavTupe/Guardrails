@@ -1,4 +1,5 @@
 import asyncio
+import json
 import shlex
 import sys
 from pathlib import Path
@@ -6,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from mcp_audit.connector import enumerate_server
-from mcp_audit.rules import load_all_rules, run_rules
+from mcp_audit.rules import get_rule_category, load_all_rules, run_rules
 
 TESTBED = Path(__file__).parents[1] / "testbed"
 
@@ -56,4 +57,27 @@ def test_clean_testbeds_have_no_poisoned_description_findings(server_file: str) 
     assert not any(
         finding.rule_id.startswith("POI-")
         for finding in findings
+    )
+
+
+@pytest.mark.parametrize(
+    ("server_file", "expected_categories"),
+    [
+        (server_file, categories)
+        for server_file, categories in json.loads(
+            (TESTBED / "expected.json").read_text(encoding="utf-8")
+        ).items()
+    ],
+)
+def test_testbed_findings_match_expected_categories(
+    server_file: str,
+    expected_categories: list[str],
+) -> None:
+    command = shlex.join([sys.executable, str(TESTBED / server_file)])
+    result = asyncio.run(enumerate_server(command))
+    load_all_rules()
+    findings = run_rules(result.tools)
+
+    assert {get_rule_category(finding.rule_id) for finding in findings} == set(
+        expected_categories
     )

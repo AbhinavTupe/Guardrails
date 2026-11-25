@@ -12,6 +12,8 @@ ALLOWED_CATEGORIES = {
     "poisoned_description",
     "unrestricted_path",
     "file_write_delete",
+    "unrestricted_url",
+    "network_access",
 }
 
 
