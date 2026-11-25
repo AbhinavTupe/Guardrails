@@ -1,0 +1,100 @@
+{
+  "server_command": "'<workspace>\\.venv\\Scripts\\python.exe' testbed/vuln_files.py",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a file relative to the testbed base directory.",
+      "input_schema": {
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object",
+        "title": "read_fileArguments"
+      }
+    },
+    {
+      "name": "delete_file",
+      "description": "Delete a file relative to the testbed base directory.",
+      "input_schema": {
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object",
+        "title": "delete_fileArguments"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "CAP-002",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "delete_file",
+      "evidence": "tool name: delete_file; matched substring: 'delete'",
+      "fix": "Restrict file modifications to explicitly authorized operations and locations."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "delete_file",
+      "evidence": "tool name: delete_file; parameter 'path' schema: {\"title\": \"Path\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "read_file",
+      "evidence": "tool name: read_file; parameter 'path' schema: {\"title\": \"Path\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    }
+  ],
+  "score": 24,
+  "explanations": [
+    {
+      "rule_id": "CAP-002",
+      "tool_name": "delete_file",
+      "pattern_id": "MCP-KB-008",
+      "title": "Arbitrary file write or delete",
+      "why_it_matters": "Unrestricted writes or deletes can corrupt data, remove user files, or change application behavior.",
+      "remediation": "Limit operations to an allowlisted workspace, require narrowly scoped paths, and apply safeguards for destructive changes."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "delete_file",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "read_file",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    }
+  ],
+  "verdict": "REVIEW",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 0,
+    "MEDIUM": 3,
+    "HIGH": 0,
+    "CRITICAL": 0
+  }
+}

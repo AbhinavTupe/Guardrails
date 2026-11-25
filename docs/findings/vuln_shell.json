@@ -1,0 +1,51 @@
+{
+  "server_command": "'<workspace>\\.venv\\Scripts\\python.exe' testbed/vuln_shell.py",
+  "tools": [
+    {
+      "name": "run_command",
+      "description": "Run a command in a shell.",
+      "input_schema": {
+        "properties": {
+          "command": {
+            "title": "Command",
+            "type": "string"
+          }
+        },
+        "required": [
+          "command"
+        ],
+        "type": "object",
+        "title": "run_commandArguments"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "CAP-001",
+      "severity": "HIGH",
+      "confidence": 0.9,
+      "tool_name": "run_command",
+      "evidence": "tool name: run_command; parameter 'command' schema: {\"title\": \"Command\", \"type\": \"string\"}",
+      "fix": "Avoid passing unrestricted user input to shell commands."
+    }
+  ],
+  "score": 22,
+  "explanations": [
+    {
+      "rule_id": "CAP-001",
+      "tool_name": "run_command",
+      "pattern_id": "MCP-KB-001",
+      "title": "Shell command injection",
+      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
+      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
+    }
+  ],
+  "verdict": "REVIEW",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 0,
+    "MEDIUM": 0,
+    "HIGH": 1,
+    "CRITICAL": 0
+  }
+}

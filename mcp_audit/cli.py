@@ -27,6 +27,21 @@ def main() -> None:
     """Audit MCP servers for security risks."""
 
 
+def run_scan(command: str, probe: bool = False) -> ScanResult:
+    """Enumerate a server and apply the CLI's standard rule and probe path."""
+    server = asyncio.run(enumerate_server(command))
+    load_all_rules()
+    findings = run_rules(server.tools)
+    if probe:
+        findings.extend(asyncio.run(run_probes(command, server.tools)))
+    return ScanResult(
+        server_command=command,
+        tools=server.tools,
+        findings=findings,
+        score=score_findings(findings),
+    )
+
+
 @app.command()
 def scan(
     command: str,
@@ -37,28 +52,15 @@ def scan(
 ) -> None:
     """Scan an MCP server launched by COMMAND."""
     try:
-        server = asyncio.run(enumerate_server(command))
+        if probe:
+            typer.echo(PROBE_WARNING, err=True)
+        result = run_scan(command, probe=probe)
     except ConnectorError as exc:
         message = str(exc).replace("\r", " ").replace("\n", " ")
         typer.echo(f"Error: {message}", err=True)
         raise typer.Exit(code=2) from exc
 
-    load_all_rules()
-    findings = run_rules(server.tools)
-    if probe:
-        typer.echo(PROBE_WARNING, err=True)
-        try:
-            findings.extend(asyncio.run(run_probes(command, server.tools)))
-        except ConnectorError as exc:
-            message = str(exc).replace("\r", " ").replace("\n", " ")
-            typer.echo(f"Error: {message}", err=True)
-            raise typer.Exit(code=2) from exc
-    result = ScanResult(
-        server_command=command,
-        tools=server.tools,
-        findings=findings,
-        score=score_findings(findings),
-    )
+    findings = result.findings
 
     if html is not None:
         html.write_text(render_html(result), encoding="utf-8")

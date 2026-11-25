@@ -12,3 +12,9 @@ includes an `explanations` list with the matching pattern and remediation.
 Use `mcp-audit scan --html report.html <command>` to write a self-contained
 interactive HTML report; this uses the committed web build and does not require
 Node.js at runtime.
+
+## Batch scan targets
+
+`docs/targets.json` is a JSON array of objects with `name`, `command`,
+`source_url`, and `install_note` fields. Commands are launch commands relative
+to the repository root; run batch scans with `python scripts/scan_public.py --i-understand`.

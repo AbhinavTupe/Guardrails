@@ -1,0 +1,20 @@
+[
+  {
+    "name": "vuln_shell",
+    "command": "python testbed/vuln_shell.py",
+    "source_url": "https://github.com/AbhinavTupe/Guardrails/blob/main/testbed/vuln_shell.py",
+    "install_note": "Local testbed server; Python dependencies are provided by the active mcp-audit environment."
+  },
+  {
+    "name": "vuln_files",
+    "command": "python testbed/vuln_files.py",
+    "source_url": "https://github.com/AbhinavTupe/Guardrails/blob/main/testbed/vuln_files.py",
+    "install_note": "Local testbed server; Python dependencies are provided by the active mcp-audit environment."
+  },
+  {
+    "name": "vuln_poisoned",
+    "command": "python testbed/vuln_poisoned.py",
+    "source_url": "https://github.com/AbhinavTupe/Guardrails/blob/main/testbed/vuln_poisoned.py",
+    "install_note": "Local testbed server; Python dependencies are provided by the active mcp-audit environment."
+  }
+]
