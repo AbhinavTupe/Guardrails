@@ -75,6 +75,7 @@ def test_json_output_contains_severity_name() -> None:
 
     parsed = json.loads(result.to_json())
     assert parsed["findings"][0]["severity"] == "CRITICAL"
+    assert "explanations" in parsed
 
 
 def test_scan_result_includes_verdict_and_severity_counts() -> None:

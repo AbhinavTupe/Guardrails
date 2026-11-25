@@ -55,6 +55,32 @@ def test_poisoned_testbed_exits_one() -> None:
     assert result.exit_code == 1
 
 
+def test_text_report_includes_explanation() -> None:
+    server_command = shlex.join([
+        sys.executable,
+        str(Path(__file__).parents[1] / "testbed" / "vuln_poisoned.py"),
+    ])
+    result = runner.invoke(app, ["scan", server_command])
+
+    assert result.exit_code == 1
+    assert "Findings:" in result.output
+    assert "[HIGH] POI-001 Instruction override in description" in result.output
+    assert "Why it matters:" in result.output
+
+
+def test_json_report_includes_explanations() -> None:
+    server_command = shlex.join([
+        sys.executable,
+        str(Path(__file__).parents[1] / "testbed" / "vuln_poisoned.py"),
+    ])
+    result = runner.invoke(app, ["scan", "--json", server_command])
+
+    assert result.exit_code == 1
+    parsed = json.loads(result.stdout)
+    assert parsed["explanations"]
+    assert parsed["explanations"][0]["rule_id"] == "POI-001"
+
+
 def test_clean_testbed_exits_zero() -> None:
     server_command = shlex.join([
         sys.executable,

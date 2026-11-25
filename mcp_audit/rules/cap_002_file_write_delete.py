@@ -6,7 +6,7 @@ from mcp_audit.rules.registry import register
 NAME_INDICATORS = ("write", "delete", "remove", "unlink", "rmdir", "overwrite", "move")
 
 
-@register("CAP-002", "File write or delete", "file_write_delete")
+@register("CAP-002", "File write/delete capability", "file_write_delete")
 def check_file_write_delete(tool: ToolInfo) -> list[Finding]:
     matched_indicator = next(
         (indicator for indicator in NAME_INDICATORS if indicator in tool.name.casefold()),

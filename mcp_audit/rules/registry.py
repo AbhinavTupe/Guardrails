@@ -30,6 +30,17 @@ PROBE_CATEGORIES = {
     "PRB-001": "unrestricted_path",
     "PRB-002": "shell_exec",
 }
+PROBE_TITLES = {
+    "PRB-001": "Path traversal probe",
+    "PRB-002": "Shell command injection probe",
+}
+
+
+def get_rule_title(rule_id: str) -> str:
+    """Return a registered rule title or the title for a probe rule."""
+    if rule_id in RULES:
+        return RULES[rule_id].title
+    return PROBE_TITLES.get(rule_id, rule_id)
 
 
 def register(rule_id: str, title: str, category: str) -> Callable[[Rule], Rule]:

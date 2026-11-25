@@ -6,9 +6,11 @@ from collections import defaultdict
 import typer
 
 from mcp_audit.connector import ConnectorError, enumerate_server
+from mcp_audit.kb.retriever import KeywordRetriever
 from mcp_audit.models import Finding, ScanResult
 from mcp_audit.probes import run_probes
 from mcp_audit.rules import load_all_rules, run_rules
+from mcp_audit.rules.registry import get_rule_title
 from mcp_audit.scoring import score_findings
 
 app = typer.Typer()
@@ -59,6 +61,12 @@ def scan(
     else:
         typer.echo(f"Server command: {result.server_command}")
         typer.echo(f"Score: {result.score}")
+        counts = result.severity_counts
+        typer.echo(
+            f"Findings: {len(result.findings)} "
+            f"({counts['CRITICAL']} critical, {counts['HIGH']} high, "
+            f"{counts['MEDIUM']} medium, {counts['LOW']} low)"
+        )
         typer.echo(f"Verdict: {result.verdict}")
         typer.echo(f"Tools found: {len(result.tools)}")
 
@@ -69,13 +77,22 @@ def scan(
             for finding in result.findings:
                 grouped[finding.tool_name].append(finding)
 
+            retriever = KeywordRetriever()
             for tool_name, tool_findings in grouped.items():
                 typer.echo(f"\nTool: {tool_name}")
                 for finding in tool_findings:
+                    explanation = retriever.explain(finding)
+                    why_it_matters = (
+                        f"\n  Why it matters: {explanation.why_it_matters}"
+                        if explanation is not None
+                        else ""
+                    )
                     typer.echo(
-                        f"[{finding.severity.value}] {finding.rule_id}\n"
+                        f"[{finding.severity.value}] {finding.rule_id} "
+                        f"{get_rule_title(finding.rule_id)}\n"
                         f"  Evidence: {finding.evidence}\n"
                         f"  Fix: {finding.fix}"
+                        f"{why_it_matters}"
                     )
 
     threshold = fail_on.upper()

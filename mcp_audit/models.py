@@ -72,6 +72,21 @@ class ScanResult:
             }
             for finding in data["findings"]
         ]
+        from mcp_audit.kb.retriever import KeywordRetriever
+
+        retriever = KeywordRetriever()
+        data["explanations"] = [
+            {
+                "rule_id": finding.rule_id,
+                "tool_name": finding.tool_name,
+                "pattern_id": explanation.pattern_id,
+                "title": explanation.title,
+                "why_it_matters": explanation.why_it_matters,
+                "remediation": explanation.remediation,
+            }
+            for finding in self.findings
+            if (explanation := retriever.explain(finding)) is not None
+        ]
         data["verdict"] = self.verdict
         data["severity_counts"] = self.severity_counts
         return data
