@@ -75,3 +75,29 @@ def test_json_output_contains_severity_name() -> None:
 
     parsed = json.loads(result.to_json())
     assert parsed["findings"][0]["severity"] == "CRITICAL"
+
+
+def test_scan_result_includes_verdict_and_severity_counts() -> None:
+    finding = Finding(
+        rule_id="RULE-1",
+        severity=Severity.HIGH,
+        confidence=0.9,
+        tool_name="shell",
+        evidence="Concrete evidence",
+        fix="Disable command execution",
+    )
+    result = ScanResult(
+        server_command="python server.py",
+        findings=[finding],
+        score=22,
+    )
+
+    data = result.to_dict()
+    assert data["verdict"] == "REVIEW"
+    assert data["severity_counts"] == {
+        "INFO": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 1,
+        "CRITICAL": 0,
+    }

@@ -39,3 +39,23 @@ def test_scan_connector_error_exits_two_with_one_line() -> None:
 
     assert result.exit_code == 2
     assert len(result.output.strip().splitlines()) == 1
+
+
+def test_poisoned_testbed_exits_one() -> None:
+    server_command = shlex.join([
+        sys.executable,
+        str(Path(__file__).parents[1] / "testbed" / "vuln_poisoned.py"),
+    ])
+    result = runner.invoke(app, ["scan", server_command])
+
+    assert result.exit_code == 1
+
+
+def test_clean_testbed_exits_zero() -> None:
+    server_command = shlex.join([
+        sys.executable,
+        str(Path(__file__).parents[1] / "testbed" / "clean_calc.py"),
+    ])
+    result = runner.invoke(app, ["scan", server_command])
+
+    assert result.exit_code == 0

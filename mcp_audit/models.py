@@ -50,6 +50,19 @@ class ScanResult:
     findings: list[Finding] = field(default_factory=list)
     score: int = 0
 
+    @property
+    def verdict(self) -> str:
+        from mcp_audit.scoring import verdict
+
+        return verdict(self.score)
+
+    @property
+    def severity_counts(self) -> dict[str, int]:
+        counts = {severity.value: 0 for severity in Severity}
+        for finding in self.findings:
+            counts[finding.severity.value] += 1
+        return counts
+
     def to_dict(self) -> dict[str, object]:
         data = asdict(self)
         data["findings"] = [
@@ -59,6 +72,8 @@ class ScanResult:
             }
             for finding in data["findings"]
         ]
+        data["verdict"] = self.verdict
+        data["severity_counts"] = self.severity_counts
         return data
 
     def to_json(self) -> str:
