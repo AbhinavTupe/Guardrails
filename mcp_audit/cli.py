@@ -7,10 +7,14 @@ import typer
 
 from mcp_audit.connector import ConnectorError, enumerate_server
 from mcp_audit.models import Finding, ScanResult
+from mcp_audit.probes import run_probes
 from mcp_audit.rules import load_all_rules, run_rules
 from mcp_audit.scoring import score_findings
 
 app = typer.Typer()
+PROBE_WARNING = (
+    "Probes make harmless test calls to the target. Use only on servers you trust to run locally."
+)
 
 
 @app.callback()
@@ -26,7 +30,6 @@ def scan(
     fail_on: str = typer.Option("high", "--fail-on"),
 ) -> None:
     """Scan an MCP server launched by COMMAND."""
-    del probe
     try:
         server = asyncio.run(enumerate_server(command))
     except ConnectorError as exc:
@@ -36,6 +39,14 @@ def scan(
 
     load_all_rules()
     findings = run_rules(server.tools)
+    if probe:
+        typer.echo(PROBE_WARNING, err=True)
+        try:
+            findings.extend(asyncio.run(run_probes(command, server.tools)))
+        except ConnectorError as exc:
+            message = str(exc).replace("\r", " ").replace("\n", " ")
+            typer.echo(f"Error: {message}", err=True)
+            raise typer.Exit(code=2) from exc
     result = ScanResult(
         server_command=command,
         tools=server.tools,

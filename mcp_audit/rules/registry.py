@@ -26,6 +26,10 @@ class RuleDefinition:
 
 
 RULES: dict[str, RuleDefinition] = {}
+PROBE_CATEGORIES = {
+    "PRB-001": "unrestricted_path",
+    "PRB-002": "shell_exec",
+}
 
 
 def register(rule_id: str, title: str, category: str) -> Callable[[Rule], Rule]:
@@ -54,4 +58,6 @@ def unregister_rule(rule_id: str) -> None:
 
 def get_rule_category(rule_id: str) -> str:
     """Return the category for a registered rule ID."""
-    return RULES[rule_id].category
+    if rule_id in RULES:
+        return RULES[rule_id].category
+    return PROBE_CATEGORIES[rule_id]
