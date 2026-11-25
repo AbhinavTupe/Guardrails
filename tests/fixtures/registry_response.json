@@ -1,0 +1,80 @@
+{
+  "servers": [
+    {
+      "server": {
+        "name": "io.example/clean-npm",
+        "repository": {"url": "https://github.com/example/clean-npm"},
+        "version": "1.0.0",
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@example/clean-npm",
+            "version": "1.0.0",
+            "transport": {"type": "stdio"}
+          }
+        ]
+      }
+    },
+    {
+      "server": {
+        "name": "io.example/clean-pypi",
+        "repository": {"url": "https://github.com/example/clean-pypi"},
+        "version": "2.0.0",
+        "packages": [
+          {
+            "registryType": "pypi",
+            "identifier": "clean-pypi",
+            "version": "2.0.0",
+            "transport": {"type": "stdio"}
+          }
+        ]
+      }
+    },
+    {
+      "server": {
+        "name": "io.example/requires-env",
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "requires-env",
+            "version": "1.0.0",
+            "transport": {"type": "stdio"},
+            "environmentVariables": [
+              {"name": "API_KEY", "isRequired": true, "isSecret": true}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "server": {
+        "name": "io.example/requires-positional",
+        "packages": [
+          {
+            "registryType": "pypi",
+            "identifier": "requires-positional",
+            "version": "1.0.0",
+            "transport": {"type": "stdio"},
+            "packageArguments": [
+              {"type": "positional", "isRequired": true, "valueHint": "path"}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "server": {
+        "name": "io.example/remote",
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "remote-only",
+            "version": "1.0.0",
+            "transport": {"type": "streamable-http"}
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {}
+}
