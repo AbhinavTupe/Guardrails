@@ -2,6 +2,7 @@
 
 import asyncio
 from collections import defaultdict
+from collections.abc import Mapping
 from pathlib import Path
 
 import typer
@@ -27,13 +28,28 @@ def main() -> None:
     """Audit MCP servers for security risks."""
 
 
-def run_scan(command: str, probe: bool = False) -> ScanResult:
+def run_scan(
+    command: str,
+    probe: bool = False,
+    *,
+    env: Mapping[str, str] | None = None,
+    cwd: str | Path | None = None,
+) -> ScanResult:
     """Enumerate a server and apply the CLI's standard rule and probe path."""
-    server = asyncio.run(enumerate_server(command))
+    server = (
+        asyncio.run(enumerate_server(command, env=env, cwd=cwd))
+        if env is not None or cwd is not None
+        else asyncio.run(enumerate_server(command))
+    )
     load_all_rules()
     findings = run_rules(server.tools)
     if probe:
-        findings.extend(asyncio.run(run_probes(command, server.tools)))
+        probe_result = (
+            run_probes(command, server.tools, env=env, cwd=cwd)
+            if env is not None or cwd is not None
+            else run_probes(command, server.tools)
+        )
+        findings.extend(asyncio.run(probe_result))
     return ScanResult(
         server_command=command,
         tools=server.tools,

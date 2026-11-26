@@ -2,8 +2,9 @@
 
 import asyncio
 import shlex
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Mapping
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -17,7 +18,12 @@ class ConnectorError(Exception):
 
 
 @asynccontextmanager
-async def open_server_session(command: str) -> AsyncIterator[ClientSession]:
+async def open_server_session(
+    command: str,
+    *,
+    env: Mapping[str, str] | None = None,
+    cwd: str | Path | None = None,
+) -> AsyncIterator[ClientSession]:
     """Launch a server command over stdio and yield its initialized session."""
     try:
         parts = shlex.split(command)
@@ -27,9 +33,13 @@ async def open_server_session(command: str) -> AsyncIterator[ClientSession]:
         raise ConnectorError("Server command is empty")
 
     try:
-        async with stdio_client(
-            StdioServerParameters(command=parts[0], args=parts[1:])
-        ) as (read_stream, write_stream):
+        parameters = StdioServerParameters(
+            command=parts[0],
+            args=parts[1:],
+            env=dict(env) if env is not None else None,
+            cwd=cwd,
+        )
+        async with stdio_client(parameters) as (read_stream, write_stream):
             async with ClientSession(read_stream, write_stream) as session:
                 await session.initialize()
                 yield session
@@ -39,11 +49,22 @@ async def open_server_session(command: str) -> AsyncIterator[ClientSession]:
         raise ConnectorError(f"MCP server launch or protocol error: {exc}") from exc
 
 
-async def enumerate_server(command: str, timeout: float = 30.0) -> ServerInfo:
+async def enumerate_server(
+    command: str,
+    timeout: float = 30.0,
+    *,
+    env: Mapping[str, str] | None = None,
+    cwd: str | Path | None = None,
+) -> ServerInfo:
     """Launch a server command over stdio and enumerate its MCP capabilities."""
 
     async def enumerate_session() -> ServerInfo:
-        async with open_server_session(command) as session:
+        session_context = (
+            open_server_session(command, env=env, cwd=cwd)
+            if env is not None or cwd is not None
+            else open_server_session(command)
+        )
+        async with session_context as session:
             tool_result = await session.list_tools()
             tools = [
                 ToolInfo(

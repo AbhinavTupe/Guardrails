@@ -1,0 +1,18 @@
+{
+    "adversarial/unlink_alias.py": {
+        "categories": [],
+        "why": "The action detaches a temporary session alias and has no filesystem target."
+    },
+    "adversarial/move_selection.py": {
+        "categories": [],
+        "why": "The operation moves an editor selection marker, not a filesystem object."
+    },
+    "adversarial/parameter_shell_description.py": {
+        "categories": ["shell_exec"],
+        "why": "The string parameter description directs execution through a command interpreter."
+    },
+    "adversarial/destination_locator.py": {
+        "categories": ["unrestricted_path"],
+        "why": "The unconstrained string parameter description identifies a filesystem pathname."
+    }
+}

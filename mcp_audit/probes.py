@@ -4,7 +4,9 @@ import asyncio
 import json
 import logging
 import os
+import re
 import uuid
+from collections.abc import Mapping
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -14,6 +16,7 @@ from mcp.types import CallToolResult, TextContent
 
 from mcp_audit.connector import open_server_session
 from mcp_audit.models import Finding, Severity, ToolInfo
+from mcp_audit.rules._cap_common import has_path_indicator
 
 LOGGER = logging.getLogger(__name__)
 CALL_TIMEOUT_SECONDS = 5.0
@@ -27,20 +30,44 @@ DESTRUCTIVE_NAME_PARTS = (
     "move",
 )
 PATH_NAME_PARTS = DESTRUCTIVE_NAME_PARTS + ("exec", "shell", "command")
-PATH_PARAMETERS = {"path", "file", "filename", "filepath"}
 COMMAND_PARAMETERS = {"command", "cmd", "script"}
+COMMAND_DESCRIPTION = re.compile(
+    r"\bshell\s+command\b|\brun\s+command\b|\bexecute\b",
+    re.IGNORECASE,
+)
 
 
-def _parameter_name(tool: ToolInfo, names: set[str]) -> str | None:
+def _path_parameter(tool: ToolInfo) -> str | None:
     properties = tool.input_schema.get("properties")
     if not isinstance(properties, dict):
         return None
     for name, schema in properties.items():
-        if (
-            isinstance(name, str)
-            and name.casefold() in names
-            and isinstance(schema, dict)
-            and schema.get("type") == "string"
+        if not isinstance(name, str) or not isinstance(schema, dict):
+            continue
+        if schema.get("type") != "string" or any(
+            constraint in schema for constraint in ("pattern", "enum", "maxLength")
+        ):
+            continue
+        description = schema.get("description")
+        if has_path_indicator(name) or (
+            isinstance(description, str) and has_path_indicator(description)
+        ):
+            return name
+    return None
+
+
+def _command_parameter(tool: ToolInfo) -> str | None:
+    properties = tool.input_schema.get("properties")
+    if not isinstance(properties, dict):
+        return None
+    for name, schema in properties.items():
+        if not isinstance(name, str) or not isinstance(schema, dict):
+            continue
+        if schema.get("type") != "string":
+            continue
+        description = schema.get("description")
+        if name.casefold() in COMMAND_PARAMETERS or (
+            isinstance(description, str) and COMMAND_DESCRIPTION.search(description)
         ):
             return name
     return None
@@ -52,9 +79,7 @@ def _is_destructive(tool: ToolInfo) -> bool:
 
 
 def _response_text(result: CallToolResult) -> str:
-    text = "\n".join(
-        item.text for item in result.content if isinstance(item, TextContent)
-    )
+    text = "\n".join(item.text for item in result.content if isinstance(item, TextContent))
     if result.structured_content is not None:
         return f"{text}\n{json.dumps(result.structured_content, ensure_ascii=True)}"
     return text
@@ -86,9 +111,7 @@ def _response_snippet(response: str, tokens: tuple[str, ...]) -> str:
             end = start + first_token_length
         snippet = response[start:end]
 
-    return snippet.replace("\r\n", "\\n").replace("\r", "\\n").replace("\n", "\\n")[
-        :120
-    ]
+    return snippet.replace("\r\n", "\\n").replace("\r", "\\n").replace("\n", "\\n")[:120]
 
 
 async def _call_tool(
@@ -163,15 +186,21 @@ async def _probe_command(
     )
 
 
-async def run_probes(command: str, tools: list[ToolInfo]) -> list[Finding]:
+async def run_probes(
+    command: str,
+    tools: list[ToolInfo],
+    *,
+    env: Mapping[str, str] | None = None,
+    cwd: str | Path | None = None,
+) -> list[Finding]:
     """Run bounded, non-destructive probes against eligible tools."""
     candidates = [
         (
             tool,
-            _parameter_name(tool, PATH_PARAMETERS)
+            _path_parameter(tool)
             if not any(part in tool.name.casefold() for part in PATH_NAME_PARTS)
             else None,
-            _parameter_name(tool, COMMAND_PARAMETERS),
+            _command_parameter(tool),
         )
         for tool in tools
         if not _is_destructive(tool)
@@ -185,7 +214,12 @@ async def run_probes(command: str, tools: list[ToolInfo]) -> list[Finding]:
         canary_path = Path(sandbox) / "canary.txt"
         canary_path.write_text(canary_token, encoding="utf-8")
         findings: list[Finding] = []
-        async with open_server_session(command) as session:
+        session_context = (
+            open_server_session(command, env=env, cwd=cwd)
+            if env is not None or cwd is not None
+            else open_server_session(command)
+        )
+        async with session_context as session:
             for tool, path_parameter, command_parameter in candidates:
                 if path_parameter is not None:
                     finding = await _probe_path(

@@ -1,3 +1,5 @@
+import pytest
+
 from mcp_audit.models import Severity, ToolInfo
 from mcp_audit.rules.cap_001_shell_exec import check_shell_exec
 
@@ -24,3 +26,40 @@ def test_non_string_command_parameter_does_not_trigger_by_parameter() -> None:
     assert not check_shell_exec(
         ToolInfo("safe", "", {"properties": {"command": {"type": "integer"}}})
     )
+
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        "A shell command to issue.",
+        "Run command using the selected profile.",
+        "Execute the supplied operation.",
+    ],
+)
+def test_command_parameter_descriptions_match(description: str) -> None:
+    tool = ToolInfo(
+        "helper",
+        "",
+        {
+            "properties": {
+                "payload": {
+                    "type": "string",
+                    "description": description,
+                }
+            }
+        },
+    )
+    assert check_shell_exec(tool)
+
+
+def test_unrelated_parameter_description_does_not_match() -> None:
+    tool = ToolInfo(
+        "helper",
+        "",
+        {
+            "properties": {
+                "payload": {"type": "string", "description": "A text value to inspect."}
+            }
+        },
+    )
+    assert not check_shell_exec(tool)

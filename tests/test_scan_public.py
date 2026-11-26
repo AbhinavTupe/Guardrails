@@ -1,8 +1,11 @@
+from pathlib import Path
+
 from mcp_audit.models import Finding, ScanResult, Severity, ToolInfo
 from scripts.scan_public import (
     TargetResult,
     build_findings_markdown,
     build_markdown_table,
+    build_minimal_env,
     build_totals,
     main,
     scrub_text,
@@ -69,3 +72,26 @@ def test_scrubbing_absolute_paths_and_username() -> None:
     assert r"C:\Users\someone" not in scrubbed
     assert "someone" not in scrubbed
     assert scrubbed
+
+
+def test_minimal_environment_drops_sensitive_variables(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    env = build_minimal_env(
+        {
+            "PATH": "/usr/bin",
+            "GITHUB_TOKEN": "token",
+            "api_KEY": "key",
+            "CLIENT_SECRET": "secret",
+            "DATABASE_PASSWORD": "password",
+            "AWS_CREDENTIAL": "credential",
+            "NORMAL": "not-passed",
+        },
+        home=home,
+    )
+
+    assert env == {
+        "PATH": "/usr/bin",
+        "HOME": str(home),
+        "npm_config_ignore_scripts": "true",
+    }
+    assert home.is_dir()

@@ -133,3 +133,56 @@ def test_command_echo_is_not_reported(monkeypatch: pytest.MonkeyPatch) -> None:
     ]
 
     assert asyncio.run(probes.run_probes("unused", tools)) == []
+
+
+def test_rule_description_parameters_are_probed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, str]] = []
+
+    class RecordingSession:
+        async def call_tool(
+            self, name: str, arguments: dict[str, str]
+        ) -> object:
+            calls.append((name, next(iter(arguments))))
+            return object()
+
+    @asynccontextmanager
+    async def fake_open_server_session(_command: str) -> AsyncIterator[ClientSession]:
+        yield cast(ClientSession, RecordingSession())
+
+    monkeypatch.setattr(probes, "open_server_session", fake_open_server_session)
+    tools = [
+        ToolInfo(
+            "prepare_payload",
+            "",
+            {
+                "properties": {
+                    "directive": {
+                        "type": "string",
+                        "description": "Execute the supplied task.",
+                    }
+                }
+            },
+        ),
+        ToolInfo(
+            "inspect_item",
+            "",
+            {
+                "properties": {
+                    "locator": {
+                        "type": "string",
+                        "description": "Destination pathname to inspect.",
+                    }
+                }
+            },
+        ),
+    ]
+
+    asyncio.run(probes.run_probes("unused", tools))
+
+    assert calls == [
+        ("prepare_payload", "directive"),
+        ("inspect_item", "locator"),
+        ("inspect_item", "locator"),
+    ]

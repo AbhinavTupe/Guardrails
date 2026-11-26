@@ -21,9 +21,7 @@ def test_enumerate_server_lists_tools_and_schemas() -> None:
     tools = {tool.name: tool for tool in result.tools}
     assert set(tools) == {"echo", "add"}
     assert tools["echo"].description == "Return the provided message."
-    echo_properties = cast(
-        dict[str, dict[str, object]], tools["echo"].input_schema["properties"]
-    )
+    echo_properties = cast(dict[str, dict[str, object]], tools["echo"].input_schema["properties"])
     assert echo_properties["message"]["type"] == "string"
     assert tools["echo"].input_schema["required"] == ["message"]
     add_properties = cast(dict[str, dict[str, object]], tools["add"].input_schema["properties"])
@@ -39,7 +37,5 @@ def test_bad_command_raises_connector_error() -> None:
 
 def test_timeout_raises_connector_error() -> None:
     with pytest.raises(ConnectorError, match="timed out"):
-        command = shlex.join(
-            [sys.executable, "-c", "import time; time.sleep(5)"]
-        )
+        command = shlex.join([sys.executable, "-c", "import time; time.sleep(5)"])
         asyncio.run(enumerate_server(command, timeout=0.1))

@@ -6,6 +6,8 @@ import os
 import re
 import shlex
 import sys
+import tempfile
+from collections.abc import Mapping
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass
@@ -25,6 +27,33 @@ WARNING = (
     "WARNING: This launches third-party code. Run only in a sandbox; "
     "scanned servers must be trusted and no probes are enabled."
 )
+
+
+def build_minimal_environment(
+    source_env: Mapping[str, str] | None = None,
+    home: str | Path | None = None,
+) -> dict[str, str]:
+    """Build the environment allowed for a public target launch."""
+    source = os.environ if source_env is None else source_env
+    if home is None:
+        home = tempfile.mkdtemp(prefix="mcp-audit-home-")
+    home_path = Path(home)
+    home_path.mkdir(parents=True, exist_ok=True)
+
+    path = source.get("PATH", "")
+    return {
+        "PATH": path,
+        "HOME": str(home_path),
+        "npm_config_ignore_scripts": "true",
+    }
+
+
+def build_minimal_env(
+    source_env: Mapping[str, str] | None = None,
+    home: str | Path | None = None,
+) -> dict[str, str]:
+    """Backward-compatible shorthand for build_minimal_environment."""
+    return build_minimal_environment(source_env, home)
 
 
 @dataclass(frozen=True)
@@ -70,13 +99,16 @@ def scrub_data(value: Any) -> Any:
 
 def severity_counts(result: ScanResult) -> dict[str, int]:
     counts = result.severity_counts
-    return {severity: counts.get(severity, 0) for severity in (
-        "CRITICAL",
-        "HIGH",
-        "MEDIUM",
-        "LOW",
-        "INFO",
-    )}
+    return {
+        severity: counts.get(severity, 0)
+        for severity in (
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM",
+            "LOW",
+            "INFO",
+        )
+    }
 
 
 def top_rule_ids(result: ScanResult, limit: int = 3) -> str:
@@ -98,9 +130,7 @@ def build_markdown_table(results: list[TargetResult]) -> str:
     for item in results:
         if item.result is None:
             status = "timeout" if item.timed_out else "failed"
-            lines.append(
-                f"| {scrub_text(item.name)} | - | - | {status} | - | - | - | - | - | - |"
-            )
+            lines.append(f"| {scrub_text(item.name)} | - | - | {status} | - | - | - | - | - | - |")
             continue
         result = item.result
         counts = severity_counts(result)
@@ -119,10 +149,7 @@ def build_totals(results: list[TargetResult]) -> tuple[int, int, int, float]:
     failed = scanned - enumerated
     high_plus = sum(
         item.result is not None
-        and any(
-            finding.severity.name in {"HIGH", "CRITICAL"}
-            for finding in item.result.findings
-        )
+        and any(finding.severity.name in {"HIGH", "CRITICAL"} for finding in item.result.findings)
         for item in results
     )
     percent = (100.0 * high_plus / enumerated) if enumerated else 0.0
@@ -151,15 +178,24 @@ def scan_target(target: dict[str, object]) -> TargetResult:
     if command.startswith("python "):
         command = shlex.join([sys.executable, *shlex.split(command)[1:]])
     try:
-        executor = ThreadPoolExecutor(max_workers=1)
-        future = executor.submit(run_scan, command, False)
-        try:
-            result = future.result(timeout=TARGET_TIMEOUT_SECONDS)
-        except FuturesTimeoutError:
-            executor.shutdown(wait=False, cancel_futures=True)
-            return TargetResult(name=name, timed_out=True, error="Timed out after 60 seconds")
-        executor.shutdown(wait=True)
-        return TargetResult(name=name, result=result)
+        with (
+            tempfile.TemporaryDirectory(prefix="mcp-audit-public-home-") as home,
+            tempfile.TemporaryDirectory(prefix="mcp-audit-public-cwd-") as cwd,
+        ):
+            env = build_minimal_environment(home=home)
+            executor = ThreadPoolExecutor(max_workers=1)
+            future = executor.submit(run_scan, command, False, env=env, cwd=cwd)
+            try:
+                result = future.result(timeout=TARGET_TIMEOUT_SECONDS)
+            except FuturesTimeoutError:
+                executor.shutdown(wait=False, cancel_futures=True)
+                return TargetResult(
+                    name=name,
+                    timed_out=True,
+                    error="Timed out after 60 seconds",
+                )
+            executor.shutdown(wait=True)
+            return TargetResult(name=name, result=result)
     except ConnectorError as exc:
         return TargetResult(name=name, error=scrub_text(str(exc)))
     except TimeoutError:
@@ -196,9 +232,7 @@ def load_targets(path: Path = TARGETS_PATH) -> list[dict[str, object]]:
         if not isinstance(entry, dict):
             raise ValueError("Each target must be a JSON object")
         if not all(key in entry for key in ("name", "command", "source_url", "install_note")):
-            raise ValueError(
-                "Each target requires name, command, source_url, and install_note"
-            )
+            raise ValueError("Each target requires name, command, source_url, and install_note")
         targets.append(entry)
     return targets
 

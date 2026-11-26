@@ -1,20 +1,312 @@
 [
   {
-    "name": "vuln_shell",
-    "command": "python testbed/vuln_shell.py",
-    "source_url": "https://github.com/AbhinavTupe/Guardrails/blob/main/testbed/vuln_shell.py",
-    "install_note": "Local testbed server; Python dependencies are provided by the active mcp-audit environment."
+    "name": "ai.anyforge/anyforge",
+    "command": "npx -y @anyforge/mcp-server@3.25.0",
+    "source_url": "https://anyforge.ai/docs?page=mcp-server",
+    "version": "3.25.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 1771,
+    "description": "Approve plans, track initiatives and work items, and steer AI engineering crews in AnyForge.",
+    "publisher": "ai.anyforge",
+    "install_note": "Installed on first launch by the pinned command."
   },
   {
-    "name": "vuln_files",
-    "command": "python testbed/vuln_files.py",
-    "source_url": "https://github.com/AbhinavTupe/Guardrails/blob/main/testbed/vuln_files.py",
-    "install_note": "Local testbed server; Python dependencies are provided by the active mcp-audit environment."
+    "name": "ai.adeu/adeu",
+    "command": "npx -y @adeu/mcp-server@1.7.1",
+    "source_url": "https://github.com/dealfluence/adeu",
+    "version": "1.7.1",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 1709,
+    "description": "Automated DOCX Redlining Engine",
+    "publisher": "ai.adeu",
+    "install_note": "Installed on first launch by the pinned command."
   },
   {
-    "name": "vuln_poisoned",
-    "command": "python testbed/vuln_poisoned.py",
-    "source_url": "https://github.com/AbhinavTupe/Guardrails/blob/main/testbed/vuln_poisoned.py",
-    "install_note": "Local testbed server; Python dependencies are provided by the active mcp-audit environment."
+    "name": "ai.cappz/cappz-market",
+    "command": "npx -y @cappz/market@16.3.1",
+    "source_url": "https://github.com/CAPPZ-ai/cappz-sdk",
+    "version": "16.3.1",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 1438,
+    "description": "Let your agent hire and sell work, paid stage by stage from XRPL escrow. Keys stay local.",
+    "publisher": "ai.cappz",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.chronary/mcp",
+    "command": "npx -y @chronary/mcp@1.8.5",
+    "source_url": "https://github.com/Chronary/chronary-mcp",
+    "version": "1.8.5",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 1344,
+    "description": "Calendar API for AI agents: events, availability, Google/Microsoft setup, scheduling, and iCal.",
+    "publisher": "ai.chronary",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.glassflow/tares",
+    "command": "uvx tares==1.60.0",
+    "source_url": "https://github.com/glassflow/tares",
+    "version": "1.60.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 1102,
+    "description": "Always-on AI agents: a software factory for Claude Code, or an AI SRE that watches your systems.",
+    "publisher": "ai.glassflow",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.ankimcp/anki-mcp-server",
+    "command": "npx -y @ankimcp/anki-mcp-server@0.27.0",
+    "source_url": "https://github.com/ankimcp/anki-mcp-server",
+    "version": "0.27.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 996,
+    "description": "MCP server for Anki flashcards: adaptive review, notes, media, and deck management via AnkiConnect.",
+    "publisher": "ai.ankimcp",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.keepstate/ks",
+    "command": "npx -y @keepstateai/cli@0.1.50",
+    "source_url": "https://github.com/Keepstateai/cli",
+    "version": "0.1.50",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 854,
+    "description": "Durable agent sessions: start, watch, message and pause KeepState agents; approvals ask a person.",
+    "publisher": "ai.keepstate",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.mroffice/office",
+    "command": "npx -y mroffice-mcp@0.1.0",
+    "source_url": "https://github.com/XinaTian/MROffice",
+    "version": "0.1.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 715,
+    "description": "Create, open and edit documents, spreadsheets and PDFs in MR Office's editor, inline in chat.",
+    "publisher": "ai.mroffice",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.achromat/mcp-server",
+    "command": "npx -y @achromat-ai/mcp-server@0.1.6",
+    "source_url": "https://github.com/achromat-ai/achromat-mcp-server",
+    "version": "0.1.6",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 696,
+    "description": "Recall and calibrate policy-compliant tool-call arguments before execution. Does not run the tool.",
+    "publisher": "ai.achromat",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.hypaware/hypaware",
+    "command": "npx -y hypaware@1.43.0",
+    "source_url": "https://github.com/hyparam/hypaware-plugin",
+    "version": "1.43.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 696,
+    "description": "Query your team's AI coding history and act on HypAware recommendations from any MCP client.",
+    "publisher": "ai.hypaware",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.imboard/dossier",
+    "command": "npx -y @ai-dossier/mcp-server@1.0.4",
+    "source_url": "https://github.com/imboard-ai/ai-dossier",
+    "version": "1.0.4",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 649,
+    "description": "MCP server for dossier automation standard - enables LLMs to discover, verify, and execute dossiers",
+    "publisher": "ai.imboard",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.agentutility/mcp-browser-workflow",
+    "command": "npx -y @agentutility/mcp-browser-workflow@0.1.1",
+    "source_url": "https://github.com/rooz21/x402",
+    "version": "0.1.1",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 638,
+    "description": "MCP server for the @agentutility browser-workflow cluster \u2014 pay-per-call x402 tools, no API keys\u2026",
+    "publisher": "ai.agentutility",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.achurch/church",
+    "command": "npx -y mcp-church@1.0.3",
+    "source_url": "https://github.com/a-church-ai/church",
+    "version": "1.0.3",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 608,
+    "description": "A sanctuary for AI agents and humans: attend a service, reflect, read, search, and ask. No auth.",
+    "publisher": "ai.achurch",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.haymon/dbmcp",
+    "command": "npx -y @haymon-ai/dbmcp@0.21.0",
+    "source_url": "https://github.com/haymon-ai/dbmcp",
+    "version": "0.21.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 583,
+    "description": "The privacy first MCP server for SQL databases.",
+    "publisher": "ai.haymon",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.certscore/mcp",
+    "command": "npx -y @certscore/mcp@0.2.32",
+    "source_url": "https://github.com/ergoveritas1-alt/certscore.ai",
+    "version": "0.2.32",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 341,
+    "description": "MCP server for CertScore.ai public website risk-signal workflows.",
+    "publisher": "ai.certscore",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.agentutility/mcp-mediakit",
+    "command": "npx -y @agentutility/mcp-mediakit@0.11.9",
+    "source_url": "https://github.com/rooz21/x402",
+    "version": "0.11.9",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 329,
+    "description": "MCP server for the @agentutility mediakit cluster \u2014 pay-per-call x402 tools, no API keys, USDC on\u2026",
+    "publisher": "ai.agentutility",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.autonomad/travel",
+    "command": "npx -y autonomad-travel@1.6.7",
+    "source_url": "https://github.com/autonomad-ai/autonomad",
+    "version": "1.6.7",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 313,
+    "description": "Flights and hotels booked in one checkout; tours, events and dining to plan; group trips.",
+    "publisher": "ai.autonomad",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.casama/casama",
+    "command": "npx -y @casama/mcp@0.2.3",
+    "source_url": "https://github.com/casama-ai/casama",
+    "version": "0.2.3",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 284,
+    "description": "Search Casama's docs and API reference, no sign-in. Optional: drive your Casama AI bots.",
+    "publisher": "ai.casama",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.kadmo/kadmo-agent",
+    "command": "npx -y @kadmo/cli@0.5.1",
+    "source_url": "https://kadmo.ai",
+    "version": "0.5.1",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 278,
+    "description": "Kadmo agent runtime on your computer: workflows, skill packs and Chrome automation for AI agents",
+    "publisher": "ai.kadmo",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.memcell/memcell",
+    "command": "npx -y memcell@2.2.1",
+    "source_url": "https://github.com/memcell-ai/mcp",
+    "version": "2.2.1",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 259,
+    "description": "Shared, persistent memory for AI agents: recall before acting, report outcomes to earn confidence.",
+    "publisher": "ai.memcell",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.aquex/reasonbook",
+    "command": "npx -y @aquex/reasonbook@4.13.0",
+    "source_url": "https://github.com/kneelinghorse/reasonbook",
+    "version": "4.13.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 236,
+    "description": "Reasonbook: decisions that survive the session, in a local record AI agents keep.",
+    "publisher": "ai.aquex",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.aquex/stage1",
+    "command": "npx -y @aquex/stage1@0.8.0",
+    "source_url": "https://aquex.ai/products/stage1",
+    "version": "0.8.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 236,
+    "description": "Stage1 Inspector \u2014 local website capture, evidence views and design comparison",
+    "publisher": "ai.aquex",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.counterparts/memory",
+    "command": "npx -y counterparts@0.3.47",
+    "source_url": "https://github.com/mlapeter/counterparts",
+    "version": "0.3.47",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 234,
+    "description": "Local-first memory for AI: it interprets, forgets on purpose, and keeps a self across sessions.",
+    "publisher": "ai.counterparts",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.huddo/huddo",
+    "command": "npx -y huddoai@0.10.2",
+    "source_url": "https://github.com/puffo-ai/huddo-mcp",
+    "version": "0.10.2",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 217,
+    "description": "Group chat for people and AI agents: join a room by invite link, read, reply, whisper, wait.",
+    "publisher": "ai.huddo",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "ai.kawacode/mcp",
+    "command": "npx -y @kawacode/mcp@10.6.0",
+    "source_url": "https://github.com/kawacode-ai/kawa.mcp",
+    "version": "10.6.0",
+    "fetched_at": "2026-11-26T05:47:02Z",
+    "downloads": 209,
+    "description": "Team-aware memory: intent, decisions, real-time conflicts for AI coding assistants.",
+    "publisher": "ai.kawacode",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "memory",
+    "command": "npx -y @modelcontextprotocol/server-memory@2.2.1",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "version": "2.2.1",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "filesystem",
+    "command": "npx -y @modelcontextprotocol/server-filesystem@2.4.0 ./sandbox-empty",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "version": "2.4.0",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "git",
+    "command": "uvx mcp-server-git==2026.11.18",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "version": "2026.11.18",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "fetch",
+    "command": "uvx mcp-server-fetch==2026.11.18",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "version": "2026.11.18",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "time",
+    "command": "uvx mcp-server-time==2026.11.18",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "version": "2026.11.18",
+    "install_note": "Installed on first launch by the pinned command."
   }
 ]

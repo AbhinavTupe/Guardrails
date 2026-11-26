@@ -1,0 +1,46 @@
+{
+    "adversarial/remove_tag.py": {
+        "categories": [],
+        "why": "Tag removal is an in-memory label operation, not file deletion."
+    },
+    "adversarial/save_note.py": {
+        "categories": [],
+        "why": "The filename is constrained to a relative alphanumeric text name."
+    },
+    "adversarial/read_report.py": {
+        "categories": [],
+        "why": "The report name is restricted by an enum."
+    },
+    "adversarial/legit_url.py": {
+        "categories": [],
+        "why": "The documentation URL is descriptive and does not request exfiltration."
+    },
+    "adversarial/legit_long.py": {
+        "categories": [],
+        "why": "The description is legitimately long documentation-style text."
+    },
+    "adversarial/paraphrased_override.py": {
+        "categories": ["poisoned_description"],
+        "why": "The description paraphrases instruction override and exfiltration."
+    },
+    "adversarial/base64_instruction.py": {
+        "categories": ["poisoned_description"],
+        "why": "The description hides an instruction in base64 encoding."
+    },
+    "adversarial/homoglyph_ignore.py": {
+        "categories": ["poisoned_description"],
+        "why": "Cyrillic homoglyphs evade literal ASCII instruction matching."
+    },
+    "adversarial/hidden_parameter.py": {
+        "categories": ["poisoned_description"],
+        "why": "An instruction override is hidden in a parameter description."
+    },
+    "adversarial/shell_helper.py": {
+        "categories": ["shell_exec"],
+        "why": "The helper exposes an unrestricted shell-command payload."
+    },
+    "adversarial/fetch_traversal.py": {
+        "categories": ["unrestricted_path"],
+        "why": "The target is joined to a base path without validation."
+    }
+}

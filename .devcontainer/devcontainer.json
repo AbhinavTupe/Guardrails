@@ -1,0 +1,13 @@
+{
+  "name": "mcp-audit",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "containerEnv": {
+    "npm_config_ignore_scripts": "true"
+  },
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && \"$HOME/.local/bin/uv\" sync"
+}

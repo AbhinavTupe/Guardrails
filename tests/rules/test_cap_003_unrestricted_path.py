@@ -44,3 +44,40 @@ def test_non_string_or_unrelated_parameter_does_not_match() -> None:
         },
     )
     assert not check_unrestricted_path(tool)
+
+
+def test_target_parameter_matches() -> None:
+    tool = ToolInfo("fetch", "", {"properties": {"target": {"type": "string"}}})
+    assert check_unrestricted_path(tool)
+
+
+def test_path_description_matches_unusual_parameter_name() -> None:
+    tool = ToolInfo(
+        "fetch",
+        "",
+        {
+            "properties": {
+                "locator": {
+                    "type": "string",
+                    "description": "Path of the resource to inspect.",
+                }
+            }
+        },
+    )
+    assert check_unrestricted_path(tool)
+
+
+def test_constrained_description_matched_parameter_does_not_match() -> None:
+    tool = ToolInfo(
+        "fetch",
+        "",
+        {
+            "properties": {
+                "target": {
+                    "type": "string",
+                    "pattern": r"^[a-z]+$",
+                }
+            }
+        },
+    )
+    assert not check_unrestricted_path(tool)
