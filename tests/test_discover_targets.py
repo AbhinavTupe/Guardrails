@@ -7,6 +7,8 @@ from scripts.discover_targets import (
     has_required_environment_variables,
     has_required_positional_arguments,
     paginate_and_discover,
+    parse_download_count,
+    rank_candidates,
 )
 
 FIXTURE = Path(__file__).parent / "fixtures" / "registry_response.json"
@@ -115,3 +117,76 @@ def test_pagination_fetches_next_cursor() -> None:
     ]
     assert len(calls) == 2
     assert "cursor=page%3A2" in calls[1]
+
+
+def test_max_pages_and_filter_counts() -> None:
+    calls: list[str] = []
+
+    def fetcher(url: str) -> dict[str, object]:
+        calls.append(url)
+        return {
+            "servers": [
+                make_entry("io.example/clean"),
+                make_entry(
+                    "io.example/requires-env",
+                    environment_variables=[{"name": "TOKEN", "isRequired": True}],
+                ),
+            ],
+            "metadata": {"nextCursor": "page:2"},
+        }
+
+    candidates, examined, passed = paginate_and_discover(
+        60,
+        fetcher=fetcher,
+        fetched_at="2026-11-25T00:00:00Z",
+        max_pages=1,
+        include_stats=True,
+    )
+
+    assert len(calls) == 1
+    assert examined == 2
+    assert passed == 1
+    assert [candidate["name"] for candidate in candidates] == ["io.example/clean"]
+
+
+def test_saved_download_stats_fixture_parsing() -> None:
+    npm_payload = json.loads(
+        (FIXTURE.parent / "npm_downloads.json").read_text(encoding="utf-8")
+    )
+    pypi_payload = json.loads(
+        (FIXTURE.parent / "pypi_downloads.json").read_text(encoding="utf-8")
+    )
+
+    assert parse_download_count("npm", npm_payload) == 130
+    assert parse_download_count("pypi", pypi_payload) == 139
+
+
+def test_ranking_and_per_publisher_cap() -> None:
+    candidates: list[dict[str, object]] = [
+        {"name": "pub.a/one", "publisher": "pub.a", "downloads": 10},
+        {"name": "pub.a/two", "publisher": "pub.a", "downloads": 20},
+        {"name": "pub.a/three", "publisher": "pub.a", "downloads": 30},
+        {"name": "pub.b/one", "publisher": "pub.b", "downloads": 15},
+        {"name": "pub.c/none", "publisher": "pub.c", "downloads": None},
+    ]
+
+    ranked = rank_candidates(candidates, per_publisher=2, limit=4)
+
+    assert [candidate["name"] for candidate in ranked] == [
+        "pub.a/three",
+        "pub.a/two",
+        "pub.b/one",
+        "pub.c/none",
+    ]
+
+
+def test_null_downloads_are_last() -> None:
+    candidates: list[dict[str, object]] = [
+        {"name": "b", "publisher": "pub", "downloads": None},
+        {"name": "a", "publisher": "pub", "downloads": 5},
+        {"name": "c", "publisher": "pub", "downloads": 0},
+    ]
+
+    ranked = rank_candidates(candidates, per_publisher=10, limit=3)
+
+    assert [candidate["name"] for candidate in ranked] == ["a", "c", "b"]

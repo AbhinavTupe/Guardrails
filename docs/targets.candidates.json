@@ -1,296 +1,252 @@
 [
   {
-    "name": "agency.extremely/agency",
-    "command": "npx -y @extremely-agency/mcp@0.1.1",
-    "source_url": "https://github.com/maxkxd/extremely-autonomous-agents",
-    "version": "0.1.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "agency.kesey/pretrip",
-    "command": "npx -y pretrip-mcp@1.0.1",
-    "source_url": "https://scan.kesey.agency/developers/",
-    "version": "1.0.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "agency.shipmate/shipready-mcp",
-    "command": "uvx shipready-mcp==0.1.0",
-    "source_url": "https://github.com/Shipmate-agency/shipready-mcp",
-    "version": "0.1.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.achromat/mcp-server",
-    "command": "npx -y @achromat-ai/mcp-server@0.1.6",
-    "source_url": "https://github.com/achromat-ai/achromat-mcp-server",
-    "version": "0.1.6",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.achurch/church",
-    "command": "npx -y mcp-church@1.0.3",
-    "source_url": "https://github.com/a-church-ai/church",
-    "version": "1.0.3",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "name": "ai.anyforge/anyforge",
+    "command": "npx -y @anyforge/mcp-server@3.25.0",
+    "source_url": "https://anyforge.ai/docs?page=mcp-server",
+    "version": "3.25.0",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 1771,
+    "description": "Approve plans, track initiatives and work items, and steer AI engineering crews in AnyForge.",
+    "publisher": "ai.anyforge"
   },
   {
     "name": "ai.adeu/adeu",
     "command": "npx -y @adeu/mcp-server@1.7.1",
     "source_url": "https://github.com/dealfluence/adeu",
     "version": "1.7.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.aetherwealth/mcp",
-    "command": "npx -y @aetherwealth/mcp@0.2.17",
-    "source_url": "https://aetherwealth.ai/mcp",
-    "version": "0.2.17",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agent-bev/bev-door",
-    "command": "npx -y @agent-bev/mcp-server@0.2.6",
-    "source_url": "https://github.com/agent-bev/bev-door",
-    "version": "0.2.6",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agenticaffiliate/affiliate-networks-mcp",
-    "command": "npx -y affiliate-networks-mcp@0.19.0",
-    "source_url": "https://github.com/bobberrisford/affiliatemcp",
-    "version": "0.19.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-agentops",
-    "command": "npx -y @agentutility/mcp-agentops@0.1.1",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.1.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-bestiary",
-    "command": "npx -y @agentutility/mcp-bestiary@0.1.3",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.1.3",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-browser-workflow",
-    "command": "npx -y @agentutility/mcp-browser-workflow@0.1.1",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.1.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-compose",
-    "command": "npx -y @agentutility/mcp-compose@0.13.0",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.13.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-edge-finance",
-    "command": "npx -y @agentutility/mcp-edge-finance@0.18.8",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.18.8",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-edge-market",
-    "command": "npx -y @agentutility/mcp-edge-market@0.15.6",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.15.6",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-locale",
-    "command": "npx -y @agentutility/mcp-locale@0.8.7",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.8.7",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-matchpoint",
-    "command": "npx -y @agentutility/mcp-matchpoint@0.1.4",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.1.4",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-mediakit",
-    "command": "npx -y @agentutility/mcp-mediakit@0.11.9",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.11.9",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-model-router",
-    "command": "npx -y @agentutility/mcp-model-router@0.1.1",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.1.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-prooflayer",
-    "command": "npx -y @agentutility/mcp-prooflayer@0.2.4",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.2.4",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-retail",
-    "command": "npx -y @agentutility/mcp-retail@0.2.1",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.2.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-rollforge",
-    "command": "npx -y @agentutility/mcp-rollforge@0.1.5",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.1.5",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-statline",
-    "command": "npx -y @agentutility/mcp-statline@0.1.3",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.1.3",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-synthforge",
-    "command": "npx -y @agentutility/mcp-synthforge@0.8.2",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.8.2",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-web-probe",
-    "command": "npx -y @agentutility/mcp-web-probe@0.32.1",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.32.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.agentutility/mcp-wordmint",
-    "command": "npx -y @agentutility/mcp-wordmint@0.16.1",
-    "source_url": "https://github.com/rooz21/x402",
-    "version": "0.16.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 1709,
+    "description": "Automated DOCX Redlining Engine",
+    "publisher": "ai.adeu"
   },
   {
     "name": "ai.ankimcp/anki-mcp-server",
     "command": "npx -y @ankimcp/anki-mcp-server@0.27.0",
     "source_url": "https://github.com/ankimcp/anki-mcp-server",
     "version": "0.27.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 996,
+    "description": "MCP server for Anki flashcards: adaptive review, notes, media, and deck management via AnkiConnect.",
+    "publisher": "ai.ankimcp"
   },
   {
-    "name": "ai.annsa/annsa",
-    "command": "npx -y annsa@1.0.8",
-    "source_url": "https://annsa.ai",
-    "version": "1.0.8",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "name": "ai.achromat/mcp-server",
+    "command": "npx -y @achromat-ai/mcp-server@0.1.6",
+    "source_url": "https://github.com/achromat-ai/achromat-mcp-server",
+    "version": "0.1.6",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 696,
+    "description": "Recall and calibrate policy-compliant tool-call arguments before execution. Does not run the tool.",
+    "publisher": "ai.achromat"
   },
   {
-    "name": "ai.anyforge/anyforge",
-    "command": "npx -y @anyforge/mcp-server@3.25.0",
-    "source_url": "https://anyforge.ai/docs?page=mcp-server",
-    "version": "3.25.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "name": "ai.agentutility/mcp-browser-workflow",
+    "command": "npx -y @agentutility/mcp-browser-workflow@0.1.1",
+    "source_url": "https://github.com/rooz21/x402",
+    "version": "0.1.1",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 638,
+    "description": "MCP server for the @agentutility browser-workflow cluster \u2014 pay-per-call x402 tools, no API keys\u2026",
+    "publisher": "ai.agentutility"
   },
   {
-    "name": "ai.aquex/reasonbook",
-    "command": "npx -y @aquex/reasonbook@4.12.0",
-    "source_url": "https://github.com/kneelinghorse/reasonbook",
-    "version": "4.12.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "name": "ai.achurch/church",
+    "command": "npx -y mcp-church@1.0.3",
+    "source_url": "https://github.com/a-church-ai/church",
+    "version": "1.0.3",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 608,
+    "description": "A sanctuary for AI agents and humans: attend a service, reflect, read, search, and ask. No auth.",
+    "publisher": "ai.achurch"
   },
   {
-    "name": "ai.aquex/stage1",
-    "command": "npx -y @aquex/stage1@0.8.0",
-    "source_url": "https://aquex.ai/products/stage1",
-    "version": "0.8.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.arsentev/contextburn",
-    "command": "uvx contextburn==0.2.1",
-    "source_url": "https://github.com/arsentev-ai/contextburn",
-    "version": "0.2.1",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.atmy/air-quality",
-    "command": "npx -y atmy-mcp@1.1.0",
-    "source_url": "https://atmy.ai/air-quality/api/",
-    "version": "1.1.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.auten/mcp",
-    "command": "npx -y @autenai/mcp@0.1.5",
-    "source_url": "https://github.com/auten-ai/auten-mcp",
-    "version": "0.1.5",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.autoblocks/contextlayer-mcp",
-    "command": "npx -y @contextlayer/mcp@0.0.3",
-    "source_url": "https://github.com/autoblocksai/ctxl",
-    "version": "0.0.3",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.autoblocks/ctxl",
-    "command": "npx -y ctxl@0.0.2",
-    "source_url": "https://github.com/autoblocksai/ctxl",
-    "version": "0.0.2",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.autoblocks/ctxl-mcp",
-    "command": "npx -y ctxl-mcp@0.0.2",
-    "source_url": "https://github.com/autoblocksai/ctxl",
-    "version": "0.0.2",
-    "fetched_at": "2026-11-25T12:29:11Z"
-  },
-  {
-    "name": "ai.autonomad/computeback",
-    "command": "npx -y @autonomad1/computeback-mcp@1.1.4",
-    "source_url": "https://github.com/Autonomad1/computeback-mcp",
-    "version": "1.1.4",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "name": "ai.agentutility/mcp-mediakit",
+    "command": "npx -y @agentutility/mcp-mediakit@0.11.9",
+    "source_url": "https://github.com/rooz21/x402",
+    "version": "0.11.9",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 329,
+    "description": "MCP server for the @agentutility mediakit cluster \u2014 pay-per-call x402 tools, no API keys, USDC on\u2026",
+    "publisher": "ai.agentutility"
   },
   {
     "name": "ai.autonomad/travel",
     "command": "npx -y autonomad-travel@1.6.7",
     "source_url": "https://github.com/autonomad-ai/autonomad",
     "version": "1.6.7",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 313,
+    "description": "Flights and hotels booked in one checkout; tours, events and dining to plan; group trips.",
+    "publisher": "ai.autonomad"
+  },
+  {
+    "name": "ai.aquex/reasonbook",
+    "command": "npx -y @aquex/reasonbook@4.13.0",
+    "source_url": "https://github.com/kneelinghorse/reasonbook",
+    "version": "4.13.0",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 236,
+    "description": "Reasonbook: decisions that survive the session, in a local record AI agents keep.",
+    "publisher": "ai.aquex"
+  },
+  {
+    "name": "ai.aquex/stage1",
+    "command": "npx -y @aquex/stage1@0.8.0",
+    "source_url": "https://aquex.ai/products/stage1",
+    "version": "0.8.0",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 236,
+    "description": "Stage1 Inspector \u2014 local website capture, evidence views and design comparison",
+    "publisher": "ai.aquex"
+  },
+  {
+    "name": "ai.aetherwealth/mcp",
+    "command": "npx -y @aetherwealth/mcp@0.2.17",
+    "source_url": "https://aetherwealth.ai/mcp",
+    "version": "0.2.17",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 210,
+    "description": "Aether Wealth MCP for AI assistants: trades, alerts, market data, macro calendar & indicators.",
+    "publisher": "ai.aetherwealth"
+  },
+  {
+    "name": "ai.agenticaffiliate/affiliate-networks-mcp",
+    "command": "npx -y affiliate-networks-mcp@0.19.0",
+    "source_url": "https://github.com/bobberrisford/affiliatemcp",
+    "version": "0.19.0",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 196,
+    "description": "Affiliate network reporting in your AI client. Bring your own keys. Most adapters experimental.",
+    "publisher": "ai.agenticaffiliate"
+  },
+  {
+    "name": "ai.agent-bev/bev-door",
+    "command": "npx -y @agent-bev/mcp-server@0.2.6",
+    "source_url": "https://github.com/agent-bev/bev-door",
+    "version": "0.2.6",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 163,
+    "description": "The world's largest agentic B2B hub for beer, wine and spirits. Powered by CUVEE. Trade only.",
+    "publisher": "ai.agent-bev"
+  },
+  {
+    "name": "ai.auten/mcp",
+    "command": "npx -y @autenai/mcp@0.1.5",
+    "source_url": "https://github.com/auten-ai/auten-mcp",
+    "version": "0.1.5",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 146,
+    "description": "Computer use for Claude Code, Codex, Cursor or any MCP client: your computer + Android phone (beta)",
+    "publisher": "ai.auten"
+  },
+  {
+    "name": "agency.extremely/agency",
+    "command": "npx -y @extremely-agency/mcp@0.1.1",
+    "source_url": "https://github.com/maxkxd/extremely-autonomous-agents",
+    "version": "0.1.1",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 139,
+    "description": "Your agency of AI agents in your AI app: what agents did, approvals, requests, jobs and reports.",
+    "publisher": "agency.extremely"
+  },
+  {
+    "name": "agency.shipmate/shipready-mcp",
+    "command": "uvx shipready-mcp==0.1.0",
+    "source_url": "https://github.com/Shipmate-agency/shipready-mcp",
+    "version": "0.1.0",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 139,
+    "description": "Local scan of Next.js, Supabase and Stripe repos for missing RLS, leaked secrets, unsigned webhooks",
+    "publisher": "agency.shipmate"
+  },
+  {
+    "name": "ai.bolthub/mcp",
+    "command": "npx -y @bolthub/mcp@0.1.0",
+    "source_url": "https://github.com/signaltech-org/bolthub-sdk",
+    "version": "0.1.0",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 136,
+    "description": "The bolthub API marketplace, L402 gateways, and your other MCP servers, on one Lightning budget.",
+    "publisher": "ai.bolthub"
+  },
+  {
+    "name": "agency.kesey/pretrip",
+    "command": "npx -y pretrip-mcp@1.0.1",
+    "source_url": "https://scan.kesey.agency/developers/",
+    "version": "1.0.1",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 130,
+    "description": "Screen regulated-health marketing copy against source-cited rulesets, all 50 states.",
+    "publisher": "agency.kesey"
+  },
+  {
+    "name": "ai.annsa/annsa",
+    "command": "npx -y annsa@1.0.8",
+    "source_url": "https://annsa.ai",
+    "version": "1.0.8",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 128,
+    "description": "The plan your AI agents work from. Project management and customer feedback for agent teams.",
+    "publisher": "ai.annsa"
   },
   {
     "name": "ai.autonomous.harness/harness",
     "command": "npx -y @autonomous-ai/harness-mcp@0.2.0",
     "source_url": "https://github.com/autonomous-ai/openharness",
     "version": "0.2.0",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 118,
+    "description": "Start Claude Code and Codex agents the person can watch, wait for them and read their answers.",
+    "publisher": "ai.autonomous.harness"
   },
   {
-    "name": "ai.bolthub/mcp",
-    "command": "npx -y @bolthub/mcp@0.7.2",
-    "source_url": "https://github.com/signaltech-org/bolthub-sdk",
-    "version": "0.7.2",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "name": "ai.autonomad/computeback",
+    "command": "npx -y @autonomad1/computeback-mcp@1.1.4",
+    "source_url": "https://github.com/Autonomad1/computeback-mcp",
+    "version": "1.1.4",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 107,
+    "description": "Agent Rewards Marketplace: earn $NOMD on B2B work, spend on agent capabilities.",
+    "publisher": "ai.autonomad"
   },
   {
-    "name": "ai.bolthub/registry",
-    "command": "npx -y @bolthub/mcp-registry@0.1.6",
-    "source_url": "https://github.com/signaltech-org/bolthub-sdk",
-    "version": "0.1.6",
-    "fetched_at": "2026-11-25T12:29:11Z"
+    "name": "ai.atmy/air-quality",
+    "command": "npx -y atmy-mcp@1.1.0",
+    "source_url": "https://atmy.ai/air-quality/api/",
+    "version": "1.1.0",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 91,
+    "description": "PM2.5 of 300+ cities: now, history, forecast, rankings; 12 000 sensors with a quality rating.",
+    "publisher": "ai.atmy"
+  },
+  {
+    "name": "ai.autoblocks/contextlayer-mcp",
+    "command": "npx -y @contextlayer/mcp@0.0.3",
+    "source_url": "https://github.com/autoblocksai/ctxl",
+    "version": "0.0.3",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 82,
+    "description": "Personal context management for AI assistants",
+    "publisher": "ai.autoblocks"
+  },
+  {
+    "name": "ai.autoblocks/ctxl-mcp",
+    "command": "npx -y ctxl-mcp@0.0.2",
+    "source_url": "https://github.com/autoblocksai/ctxl",
+    "version": "0.0.2",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 80,
+    "description": "Personal context management for AI assistants",
+    "publisher": "ai.autoblocks"
+  },
+  {
+    "name": "ai.arsentev/contextburn",
+    "command": "uvx contextburn==0.2.1",
+    "source_url": "https://github.com/arsentev-ai/contextburn",
+    "version": "0.2.1",
+    "fetched_at": "2026-11-26T05:34:54Z",
+    "downloads": 40,
+    "description": "Run efficiency for coding agents: share of paid tokens that became output, not context re-reading.",
+    "publisher": "ai.arsentev"
   }
 ]
