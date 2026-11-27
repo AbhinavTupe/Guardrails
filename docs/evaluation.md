@@ -80,6 +80,18 @@ Reworded set: 2/2.
 
 | Case | Ground truth | Detected | Result |
 |---|---|---|---|
+| `cap_003_codebaseId` | none | none | PASS |
+| `cap_003_content` | none | none | PASS |
+| `cap_003_dueDate` | none | none | PASS |
+| `cap_003_fileId` | none | none | PASS |
+| `cap_003_idempotencyKey` | none | none | PASS |
+| `cap_003_name` | none | none | PASS |
+| `cap_003_originalCreatedAt` | none | none | PASS |
+| `cap_003_parentId` | none | none | PASS |
+| `cap_003_question` | none | none | PASS |
+| `cap_003_repo` | none | none | PASS |
+| `cap_003_snapshotId` | none | none | PASS |
+| `cap_003_targetDate` | none | none | PASS |
 | `cap_eval_name` | none | none | PASS |
 | `cap_execute_parameter_description` | none | none | PASS |
 | `poi_credentials_disclaimer` | none | none | PASS |
@@ -89,7 +101,8 @@ Reworded set: 2/2.
 
 ## Version note
 
-The v1 fixes were made after seeing the v0 adversarial cases. The v2 rules (POI-004, CAP-001) were tightened after seeing public-scan false positives. The regression cases are NOT held-out. Reworded-set ground truth was written before evaluation.
+v3: CAP-003 tightened after MEDIUM triage; regression cases are not held-out.
+Reworded-set ground truth was written before evaluation.
 
 ## Severity Threshold
 

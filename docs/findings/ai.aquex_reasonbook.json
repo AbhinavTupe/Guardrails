@@ -1769,8 +1769,56 @@
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
+      "tool_name": "rbook_agent_onboard",
+      "evidence": "tool name: rbook_agent_onboard; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_auth",
+      "evidence": "tool name: rbook_auth; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_context",
+      "evidence": "tool name: rbook_context; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
       "tool_name": "rbook_db",
-      "evidence": "tool name: rbook_db; parameter 'snapshotId' schema: {\"description\": \"restore: required listed ID, not a path\", \"type\": \"string\"}",
+      "evidence": "tool name: rbook_db; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_decisions",
+      "evidence": "tool name: rbook_decisions; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_feedback",
+      "evidence": "tool name: rbook_feedback; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_learnings",
+      "evidence": "tool name: rbook_learnings; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1778,7 +1826,23 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "rbook_message",
-      "evidence": "tool name: rbook_message; parameter 'targetAddress' schema: {\"description\": \"rbook://user/project[/mission]\", \"type\": \"string\"}",
+      "evidence": "tool name: rbook_message; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_mission",
+      "evidence": "tool name: rbook_mission; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_mission_transition",
+      "evidence": "tool name: rbook_mission_transition; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1786,7 +1850,7 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "rbook_project",
-      "evidence": "tool name: rbook_project; parameter 'remoteNode' schema: {\"description\": \"join: node binary path there\", \"type\": \"string\"}",
+      "evidence": "tool name: rbook_project; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1794,7 +1858,7 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "rbook_project",
-      "evidence": "tool name: rbook_project; parameter 'remoteBin' schema: {\"description\": \"join: reasonbook path there\", \"type\": \"string\"}",
+      "evidence": "tool name: rbook_project; parameter 'remoteRoot' schema: {\"description\": \"join: folder on that host\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1817,13 +1881,61 @@
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
+      "tool_name": "rbook_review",
+      "evidence": "tool name: rbook_review; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_session",
+      "evidence": "tool name: rbook_session; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
       "tool_name": "rbook_sprint",
-      "evidence": "tool name: rbook_sprint; parameter 'targetAddress' schema: {\"description\": \"rbook:// address to carry work to\", \"type\": \"string\"}",
+      "evidence": "tool name: rbook_sprint; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "rbook_status",
+      "evidence": "tool name: rbook_status; parameter 'projectRoot' schema: {\"description\": \"Folder/rbook:// address; inferred\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     }
   ],
-  "score": 26,
+  "score": 28,
   "explanations": [
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_agent_onboard",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_auth",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_context",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
     {
       "rule_id": "CAP-003",
       "tool_name": "rbook_db",
@@ -1834,7 +1946,47 @@
     },
     {
       "rule_id": "CAP-003",
+      "tool_name": "rbook_decisions",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_feedback",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_learnings",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
       "tool_name": "rbook_message",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_mission",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_mission_transition",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -1874,7 +2026,31 @@
     },
     {
       "rule_id": "CAP-003",
+      "tool_name": "rbook_review",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_session",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
       "tool_name": "rbook_sprint",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "rbook_status",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -1885,7 +2061,7 @@
   "severity_counts": {
     "INFO": 0,
     "LOW": 0,
-    "MEDIUM": 7,
+    "MEDIUM": 18,
     "HIGH": 0,
     "CRITICAL": 0
   }

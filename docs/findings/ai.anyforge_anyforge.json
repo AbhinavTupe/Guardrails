@@ -12528,60 +12528,12 @@
   ],
   "findings": [
     {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_accept_observability_signal",
-      "evidence": "tool name: anyforge_accept_observability_signal; parameter 'codebaseId' schema: {\"description\": \"Target codebase id (preferred way to resolve the incident's repo).\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_accept_observability_signal",
-      "evidence": "tool name: anyforge_accept_observability_signal; parameter 'repo' schema: {\"description\": \"Target repo \\\"owner/name\\\" (used if codebaseId is omitted).\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_create_initiative",
-      "evidence": "tool name: anyforge_create_initiative; parameter 'fromRequestWorkItemId' schema: {\"description\": \"The request in a program's Incoming Requests this initiative is created to deliver \\u2014 what Approve & route's \\\"create a new initiative\\\" does in the Console. The request must still be in Incoming Requests. The initiative links the request and starts from it: its description when you send none, intake notes with the request's details, a status line, the request's priority and tags when you send none, and the key results the program's route template names. It has no operator unless you pass assignedOperatorId. Then route the request into it with anyforge_update_work_item action='approve-and-route' (targetInitiativeId = the new id); an estimate given there fills the initiative's empty team estimate.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_create_opportunity",
-      "evidence": "tool name: anyforge_create_opportunity; parameter 'dueDate' schema: {\"description\": \"Target resolution date (ISO yyyy-mm-dd).\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_create_program",
-      "evidence": "tool name: anyforge_create_program; parameter 'targetDate' schema: {\"description\": \"Target completion date (ISO yyyy-mm-dd).\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
       "rule_id": "CAP-002",
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "anyforge_delete_work_item_comment",
       "evidence": "tool name: anyforge_delete_work_item_comment; matched substring: 'delete'; description: \"Permanently delete one of YOUR OWN discussion comments on a work item, with its attached files. Same rule as the Console: only the key owner's own comment can be deleted (403 not_comment_author, or comment_not_editable for Linear-mirrored and shared-report comments; 404 comment_not_found for an unknown id). A top-level comment that still has replies is refused with 409 comment_has_replies: replies are never removed or re-parented, so delete the replies first. Requires `write` scope and a key owner who is an editor or above.\"",
       "fix": "Restrict file modifications to explicitly authorized operations and locations."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_get_file",
-      "evidence": "tool name: anyforge_get_file; parameter 'fileId' schema: {\"description\": \"The file id from the record's file list.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
       "rule_id": "CAP-003",
@@ -12603,32 +12555,8 @@
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
-      "tool_name": "anyforge_investigate_repository",
-      "evidence": "tool name: anyforge_investigate_repository; parameter 'question' schema: {\"description\": \"The complete repository question, including the bug, symbols, behavior, or path to investigate.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
       "tool_name": "anyforge_list_studio_workspace_files",
       "evidence": "tool name: anyforge_list_studio_workspace_files; parameter 'path' schema: {\"minLength\": 1, \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_post_initiative_comment",
-      "evidence": "tool name: anyforge_post_initiative_comment; parameter 'parentId' schema: {\"description\": \"Reply target \\u2014 the id of the comment being replied to.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_post_program_comment",
-      "evidence": "tool name: anyforge_post_program_comment; parameter 'parentId' schema: {\"description\": \"Reply target \\u2014 the id of the comment being replied to.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -12659,64 +12587,8 @@
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
-      "tool_name": "anyforge_start_file_upload",
-      "evidence": "tool name: anyforge_start_file_upload; parameter 'name' schema: {\"description\": \"File name with its extension, e.g. \\\"repro.mp4\\\".\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_start_file_upload",
-      "evidence": "tool name: anyforge_start_file_upload; parameter 'originalCreatedAt' schema: {\"description\": \"Optional. When the file was created in the tool it came from: an ISO 8601 date or a date and time with a zone, e.g. 2024-03-01T10:22:33.000+0000. Kept beside the upload time.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_submit_crm_proposal",
-      "evidence": "tool name: anyforge_submit_crm_proposal; parameter 'idempotencyKey' schema: {\"description\": \"A stable key for this submission, so a retry does not file twice.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_update_program",
-      "evidence": "tool name: anyforge_update_program; parameter 'targetDate' schema: {\"description\": \"Target completion date (ISO yyyy-mm-dd); empty string clears it.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_update_work_item",
-      "evidence": "tool name: anyforge_update_work_item; parameter 'targetInitiativeId' schema: {\"description\": \"For action='approve-and-route': the initiative that will DELIVER this request. For action='move-initiative': the initiative the item moves to. Required for both; must not be an Incoming Requests bucket.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
       "tool_name": "anyforge_upload_local_file",
       "evidence": "tool name: anyforge_upload_local_file; parameter 'path' schema: {\"description\": \"Absolute path of the file on this machine.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_upload_local_file",
-      "evidence": "tool name: anyforge_upload_local_file; parameter 'name' schema: {\"description\": \"Name to store it under. Defaults to the file name in `path`.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_upload_local_file",
-      "evidence": "tool name: anyforge_upload_local_file; parameter 'originalCreatedAt' schema: {\"description\": \"Optional. When the file was created in the tool it came from: an ISO 8601 date or a date and time with a zone, e.g. 2024-03-01T10:22:33.000+0000. Kept beside the upload time.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -12733,14 +12605,6 @@
       "confidence": 0.8,
       "tool_name": "anyforge_write_studio_workspace_file",
       "evidence": "tool name: anyforge_write_studio_workspace_file; parameter 'path' schema: {\"minLength\": 1, \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "anyforge_write_studio_workspace_file",
-      "evidence": "tool name: anyforge_write_studio_workspace_file; parameter 'content' schema: {\"description\": \"The complete UTF-8 file content for save (400 KB maximum). Omit for create.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -12979,60 +12843,12 @@
   "score": 45,
   "explanations": [
     {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_accept_observability_signal",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_accept_observability_signal",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_create_initiative",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_create_opportunity",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_create_program",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
       "rule_id": "CAP-002",
       "tool_name": "anyforge_delete_work_item_comment",
       "pattern_id": "MCP-KB-008",
       "title": "Arbitrary file write or delete",
       "why_it_matters": "Unrestricted writes or deletes can corrupt data, remove user files, or change application behavior.",
       "remediation": "Limit operations to an allowlisted workspace, require narrowly scoped paths, and apply safeguards for destructive changes."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_get_file",
-      "pattern_id": "MCP-KB-006",
-      "title": "Sensitive file access",
-      "why_it_matters": "Broad file access can expose credentials, private configuration, or user data to a tool caller.",
-      "remediation": "Restrict access to an explicit root and allowlisted files, and enforce permissions independently of caller input."
     },
     {
       "rule_id": "CAP-003",
@@ -13052,31 +12868,7 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "anyforge_investigate_repository",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "anyforge_list_studio_workspace_files",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_post_initiative_comment",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_post_program_comment",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -13108,62 +12900,6 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "anyforge_start_file_upload",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_start_file_upload",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_submit_crm_proposal",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_update_program",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_update_work_item",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_upload_local_file",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_upload_local_file",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "anyforge_upload_local_file",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
@@ -13177,14 +12913,6 @@
       "title": "Arbitrary file write through path input",
       "why_it_matters": "A writable path controlled by a caller can target files outside the intended workspace.",
       "remediation": "Resolve and constrain write paths to an approved root, and avoid overwriting existing files without authorization."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "anyforge_write_studio_workspace_file",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
     },
     {
       "rule_id": "CAP-003",
@@ -13431,7 +13159,7 @@
   "severity_counts": {
     "INFO": 0,
     "LOW": 29,
-    "MEDIUM": 27,
+    "MEDIUM": 10,
     "HIGH": 0,
     "CRITICAL": 0
   }

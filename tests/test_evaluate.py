@@ -67,8 +67,10 @@ def test_evaluation_markdown_has_required_sections_and_ascii_headings() -> None:
     assert "0.500 / 0.167" in markdown
     assert "1.000 / 0.833" in markdown
     assert "Reworded set: 2/2." in markdown
-    assert "NOT held-out" in markdown
-    assert "POI-004, CAP-001" in markdown
+    assert (
+        "v3: CAP-003 tightened after MEDIUM triage; regression cases are not held-out."
+        in markdown
+    )
     assert "ground truth was written before evaluation" in markdown
     assert "\u2014" not in markdown
 

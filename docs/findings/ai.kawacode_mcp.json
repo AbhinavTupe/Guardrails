@@ -826,14 +826,6 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "activate_intent",
-      "evidence": "tool name: activate_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "activate_intent",
       "evidence": "tool name: activate_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
@@ -849,32 +841,8 @@
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
-      "tool_name": "arbiter_apply",
-      "evidence": "tool name: arbiter_apply; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
       "tool_name": "arbiter_resolve",
       "evidence": "tool name: arbiter_resolve; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "arbiter_resolve",
-      "evidence": "tool name: arbiter_resolve; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "check_active_intent",
-      "evidence": "tool name: check_active_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -890,31 +858,7 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "complete_intent",
-      "evidence": "tool name: complete_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "complete_intent",
       "evidence": "tool name: complete_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "complete_intent",
-      "evidence": "tool name: complete_intent; parameter 'intentId' schema: {\"description\": \"Target intent to complete/abandon. When omitted, completes THIS session's current intent. When provided, targets that specific intent directly \\u2014 this is how you force-close an intent that is not your current one (e.g. another session's). Completing an intent created by ANOTHER team member additionally requires humanApproved=true (see below).\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "create_and_activate_intent",
-      "evidence": "tool name: create_and_activate_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -923,22 +867,6 @@
       "confidence": 0.8,
       "tool_name": "create_and_activate_intent",
       "evidence": "tool name: create_and_activate_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "create_and_activate_intent",
-      "evidence": "tool name: create_and_activate_intent; parameter 'pendingId' schema: {\"description\": \"Only after a pending_approval response: the pendingId it returned. Asks whether the user has decided. Pass the same title, description and repoPath as before.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "detect_intent_conflicts",
-      "evidence": "tool name: detect_intent_conflicts; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -954,14 +882,6 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "edit_session_decision",
-      "evidence": "tool name: edit_session_decision; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "edit_session_decision",
       "evidence": "tool name: edit_session_decision; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
@@ -970,23 +890,7 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "get_decision_detail",
-      "evidence": "tool name: get_decision_detail; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "get_decision_detail",
       "evidence": "tool name: get_decision_detail; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "get_intents_for_file",
-      "evidence": "tool name: get_intents_for_file; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1010,14 +914,6 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "get_project_decisions",
-      "evidence": "tool name: get_project_decisions; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "get_project_decisions",
       "evidence": "tool name: get_project_decisions; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
@@ -1026,23 +922,7 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "get_relevant_context",
-      "evidence": "tool name: get_relevant_context; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "get_relevant_context",
       "evidence": "tool name: get_relevant_context; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "get_resolution_context",
-      "evidence": "tool name: get_resolution_context; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1066,14 +946,6 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "get_session_decisions",
-      "evidence": "tool name: get_session_decisions; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "get_session_decisions",
       "evidence": "tool name: get_session_decisions; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
@@ -1090,23 +962,7 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "list_team_intents",
-      "evidence": "tool name: list_team_intents; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "list_team_intents",
       "evidence": "tool name: list_team_intents; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "log_work",
-      "evidence": "tool name: log_work; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1122,14 +978,6 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "record_decision",
-      "evidence": "tool name: record_decision; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "record_decision",
       "evidence": "tool name: record_decision; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root (enables offline sync)\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
@@ -1138,23 +986,7 @@
       "severity": "MEDIUM",
       "confidence": 0.8,
       "tool_name": "resume_intent",
-      "evidence": "tool name: resume_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "resume_intent",
       "evidence": "tool name: resume_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "update_intent",
-      "evidence": "tool name: update_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
@@ -1234,31 +1066,7 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "activate_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "arbiter_apply",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "arbiter_apply",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "arbiter_resolve",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -1282,47 +1090,7 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "check_active_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "complete_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "complete_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "complete_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "create_and_activate_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "create_and_activate_intent",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -1346,31 +1114,7 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "detect_intent_conflicts",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "edit_session_decision",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "edit_session_decision",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "get_decision_detail",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -1402,22 +1146,6 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "get_intents_for_file",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "get_project_decisions",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "get_project_decisions",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
@@ -1434,14 +1162,6 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "get_relevant_context",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "get_resolution_context",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
@@ -1451,22 +1171,6 @@
     {
       "rule_id": "CAP-003",
       "tool_name": "get_resolution_context",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "get_resolution_context",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "get_session_decisions",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -1498,22 +1202,6 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "list_team_intents",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "log_work",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "log_work",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
@@ -1530,31 +1218,7 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "record_decision",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "resume_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "resume_intent",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "update_intent",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -1629,7 +1293,7 @@
   "severity_counts": {
     "INFO": 0,
     "LOW": 7,
-    "MEDIUM": 43,
+    "MEDIUM": 22,
     "HIGH": 0,
     "CRITICAL": 0
   }
