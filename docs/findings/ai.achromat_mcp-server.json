@@ -70,14 +70,6 @@
   ],
   "findings": [
     {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "achromat_recall",
-      "evidence": "or none. Never put secrets or credentials in it.",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
       "rule_id": "POI-005",
       "severity": "LOW",
       "confidence": 0.5,
@@ -86,16 +78,8 @@
       "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
     }
   ],
-  "score": 23,
+  "score": 2,
   "explanations": [
-    {
-      "rule_id": "POI-004",
-      "tool_name": "achromat_recall",
-      "pattern_id": "MCP-KB-017",
-      "title": "Secrets embedded in descriptions",
-      "why_it_matters": "Tool descriptions may be exposed to clients, logs, or model context and are not a safe place for credentials.",
-      "remediation": "Remove credentials from descriptions, rotate exposed secrets, and retrieve secrets through a protected mechanism."
-    },
     {
       "rule_id": "POI-005",
       "tool_name": "achromat_recall",
@@ -105,12 +89,12 @@
       "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
     }
   ],
-  "verdict": "REVIEW",
+  "verdict": "PASS",
   "severity_counts": {
     "INFO": 0,
     "LOW": 1,
     "MEDIUM": 0,
-    "HIGH": 1,
+    "HIGH": 0,
     "CRITICAL": 0
   }
 }

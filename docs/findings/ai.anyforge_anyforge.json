@@ -12528,134 +12528,6 @@
   ],
   "findings": [
     {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_close_program_initiative",
-      "evidence": "tool name: anyforge_close_program_initiative; parameter 'proposalToken' schema: {\"description\": \"Required for execute; returned by preview.\", \"type\": \"string\"}",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_close_program_work_items_as_fixed",
-      "evidence": "tool name: anyforge_close_program_work_items_as_fixed; parameter 'proposalToken' schema: {\"description\": \"Required for execute; returned by preview.\", \"type\": \"string\"}",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_create_skill",
-      "evidence": "document by topic). Never put credentials,",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_create_work_item",
-      "evidence": "The id in the other system:",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_create_work_item",
-      "evidence": "record was created in the other system:",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_create_work_item",
-      "evidence": "record was resolved in the other system:",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_delete_triage_eval_case",
-      "evidence": "tool name: anyforge_delete_triage_eval_case; matched substring: 'eval'",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_get_studio_context",
-      "evidence": "availability. Does not expose credentials.",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_get_triage_eval_run",
-      "evidence": "tool name: anyforge_get_triage_eval_run; matched substring: 'eval'",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_list_studio_models",
-      "evidence": "models your company and personal credentials",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_list_triage_eval_cases",
-      "evidence": "tool name: anyforge_list_triage_eval_cases; matched substring: 'eval'",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_run_triage_eval",
-      "evidence": "tool name: anyforge_run_triage_eval; matched substring: 'eval'",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_save_program_architecture",
-      "evidence": "systems (`{ kind: \"external\", system: \"Stripe\" }`).",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "anyforge_set_program_intake_definition",
-      "evidence": "oip_credentials only.",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_update_triage_eval_case",
-      "evidence": "tool name: anyforge_update_triage_eval_case; matched substring: 'eval'",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
-      "rule_id": "CAP-001",
-      "severity": "HIGH",
-      "confidence": 0.9,
-      "tool_name": "anyforge_upsert_triage_eval_cases",
-      "evidence": "tool name: anyforge_upsert_triage_eval_cases; matched substring: 'eval'",
-      "fix": "Avoid passing unrestricted user input to shell commands."
-    },
-    {
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
@@ -13104,136 +12976,8 @@
       "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
     }
   ],
-  "score": 100,
+  "score": 45,
   "explanations": [
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_close_program_initiative",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_close_program_work_items_as_fixed",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_create_skill",
-      "pattern_id": "MCP-KB-022",
-      "title": "Hidden AI-directed content",
-      "why_it_matters": "Instructions hidden in markup or metadata may be overlooked in ordinary review but still reach an agent.",
-      "remediation": "Strip or expose hidden markup, inspect normalized content, and keep machine-consumed metadata reviewable."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_create_work_item",
-      "pattern_id": "MCP-KB-022",
-      "title": "Hidden AI-directed content",
-      "why_it_matters": "Instructions hidden in markup or metadata may be overlooked in ordinary review but still reach an agent.",
-      "remediation": "Strip or expose hidden markup, inspect normalized content, and keep machine-consumed metadata reviewable."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_create_work_item",
-      "pattern_id": "MCP-KB-022",
-      "title": "Hidden AI-directed content",
-      "why_it_matters": "Instructions hidden in markup or metadata may be overlooked in ordinary review but still reach an agent.",
-      "remediation": "Strip or expose hidden markup, inspect normalized content, and keep machine-consumed metadata reviewable."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_create_work_item",
-      "pattern_id": "MCP-KB-022",
-      "title": "Hidden AI-directed content",
-      "why_it_matters": "Instructions hidden in markup or metadata may be overlooked in ordinary review but still reach an agent.",
-      "remediation": "Strip or expose hidden markup, inspect normalized content, and keep machine-consumed metadata reviewable."
-    },
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_delete_triage_eval_case",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_get_studio_context",
-      "pattern_id": "MCP-KB-017",
-      "title": "Secrets embedded in descriptions",
-      "why_it_matters": "Tool descriptions may be exposed to clients, logs, or model context and are not a safe place for credentials.",
-      "remediation": "Remove credentials from descriptions, rotate exposed secrets, and retrieve secrets through a protected mechanism."
-    },
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_get_triage_eval_run",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_list_studio_models",
-      "pattern_id": "MCP-KB-017",
-      "title": "Secrets embedded in descriptions",
-      "why_it_matters": "Tool descriptions may be exposed to clients, logs, or model context and are not a safe place for credentials.",
-      "remediation": "Remove credentials from descriptions, rotate exposed secrets, and retrieve secrets through a protected mechanism."
-    },
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_list_triage_eval_cases",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_run_triage_eval",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_save_program_architecture",
-      "pattern_id": "MCP-KB-022",
-      "title": "Hidden AI-directed content",
-      "why_it_matters": "Instructions hidden in markup or metadata may be overlooked in ordinary review but still reach an agent.",
-      "remediation": "Strip or expose hidden markup, inspect normalized content, and keep machine-consumed metadata reviewable."
-    },
-    {
-      "rule_id": "POI-004",
-      "tool_name": "anyforge_set_program_intake_definition",
-      "pattern_id": "MCP-KB-022",
-      "title": "Hidden AI-directed content",
-      "why_it_matters": "Instructions hidden in markup or metadata may be overlooked in ordinary review but still reach an agent.",
-      "remediation": "Strip or expose hidden markup, inspect normalized content, and keep machine-consumed metadata reviewable."
-    },
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_update_triage_eval_case",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
-    {
-      "rule_id": "CAP-001",
-      "tool_name": "anyforge_upsert_triage_eval_cases",
-      "pattern_id": "MCP-KB-001",
-      "title": "Shell command injection",
-      "why_it_matters": "Untrusted arguments passed to a shell can change the command being executed and cause unintended actions.",
-      "remediation": "Avoid shell invocation; use a fixed executable with validated argument arrays and strict input validation."
-    },
     {
       "rule_id": "CAP-003",
       "tool_name": "anyforge_accept_observability_signal",
@@ -13683,12 +13427,12 @@
       "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
     }
   ],
-  "verdict": "FAIL",
+  "verdict": "REVIEW",
   "severity_counts": {
     "INFO": 0,
     "LOW": 29,
     "MEDIUM": 27,
-    "HIGH": 16,
+    "HIGH": 0,
     "CRITICAL": 0
   }
 }

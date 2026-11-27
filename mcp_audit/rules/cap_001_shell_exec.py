@@ -6,10 +6,20 @@ from mcp_audit.models import Finding, Severity, ToolInfo
 from mcp_audit.rules._cap_common import parameter_evidence, parameters
 from mcp_audit.rules.registry import register
 
-NAME_INDICATORS = ("run_command", "exec", "shell", "bash", "eval", "system")
+NAME_INDICATORS = ("run_command", "exec", "shell", "bash", "system")
 PARAMETER_NAMES = {"command", "cmd", "script"}
+EVAL_PARAMETER_NAMES = {"code", "expression", "script", "command"}
 PARAMETER_DESCRIPTION = re.compile(
-    r"\bshell\s+command\b|\brun\s+command\b|\bexecute\b",
+    r"\bshell\s+command\b|\brun\s+command\b|\bcommand\s+interpreter\b"
+    r"|\bbash\b|\bpowershell\b|\bsubprocess\b|\bos\.system\b",
+    re.IGNORECASE,
+)
+EVAL_DESCRIPTION = re.compile(
+    r"\b(?:run|runs|running|execute|executes|executing)\b.{0,40}"
+    r"\b(?:code|script|shell)\b"
+    r"|\b(?:code|script|shell)\b.{0,40}"
+    r"\b(?:run|runs|running|execute|executes|executing)\b"
+    r"|\bcommand\s+interpreter\b",
     re.IGNORECASE,
 )
 
@@ -18,6 +28,30 @@ def _is_command_parameter(name: str, schema: dict[str, object]) -> bool:
     description = schema.get("description")
     return name.casefold() in PARAMETER_NAMES or (
         isinstance(description, str) and bool(PARAMETER_DESCRIPTION.search(description))
+    )
+
+
+def _eval_corroboration(tool: ToolInfo) -> tuple[str, dict[str, object]] | str | None:
+    for name, schema in parameters(tool):
+        if (
+            schema.get("type") == "string"
+            and name.casefold() in EVAL_PARAMETER_NAMES
+        ):
+            return name, schema
+
+    descriptions = [tool.description]
+    descriptions.extend(
+        description
+        for _, schema in parameters(tool)
+        if isinstance((description := schema.get("description")), str)
+    )
+    return next(
+        (
+            f"tool name: {tool.name}; corroborating description: {description!r}"
+            for description in descriptions
+            if EVAL_DESCRIPTION.search(description)
+        ),
+        None,
     )
 
 
@@ -40,6 +74,26 @@ def check_shell_exec(tool: ToolInfo) -> list[Finding]:
                 fix="Avoid passing unrestricted user input to shell commands.",
             )
             for name, schema in matching_parameters
+        ]
+
+    if "eval" in tool.name.casefold():
+        corroboration = _eval_corroboration(tool)
+        if isinstance(corroboration, tuple):
+            name, schema = corroboration
+            evidence = parameter_evidence(tool, name, schema)
+        elif isinstance(corroboration, str):
+            evidence = f"tool name: {tool.name}; matched substring: 'eval'; {corroboration}"
+        else:
+            return []
+        return [
+            Finding(
+                rule_id="CAP-001",
+                severity=Severity.HIGH,
+                confidence=0.9,
+                tool_name=tool.name,
+                evidence=evidence,
+                fix="Avoid passing unrestricted user input to shell commands.",
+            )
         ]
 
     matched_indicator = next(

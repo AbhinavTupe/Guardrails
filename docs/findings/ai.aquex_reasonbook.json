@@ -1766,14 +1766,6 @@
   ],
   "findings": [
     {
-      "rule_id": "POI-004",
-      "severity": "HIGH",
-      "confidence": 0.85,
-      "tool_name": "rbook_auth",
-      "evidence": "login_complete, rotate and reissue store credentials;",
-      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
-    },
-    {
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
@@ -1830,16 +1822,8 @@
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     }
   ],
-  "score": 47,
+  "score": 26,
   "explanations": [
-    {
-      "rule_id": "POI-004",
-      "tool_name": "rbook_auth",
-      "pattern_id": "MCP-KB-017",
-      "title": "Secrets embedded in descriptions",
-      "why_it_matters": "Tool descriptions may be exposed to clients, logs, or model context and are not a safe place for credentials.",
-      "remediation": "Remove credentials from descriptions, rotate exposed secrets, and retrieve secrets through a protected mechanism."
-    },
     {
       "rule_id": "CAP-003",
       "tool_name": "rbook_db",
@@ -1902,7 +1886,7 @@
     "INFO": 0,
     "LOW": 0,
     "MEDIUM": 7,
-    "HIGH": 1,
+    "HIGH": 0,
     "CRITICAL": 0
   }
 }

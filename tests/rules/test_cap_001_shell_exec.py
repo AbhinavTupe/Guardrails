@@ -33,7 +33,11 @@ def test_non_string_command_parameter_does_not_trigger_by_parameter() -> None:
     [
         "A shell command to issue.",
         "Run command using the selected profile.",
-        "Execute the supplied operation.",
+        "Execute the supplied task through the local command interpreter.",
+        "Use bash to run the supplied operation.",
+        "Run through PowerShell.",
+        "Launch with subprocess.",
+        "Uses os.system for execution.",
     ],
 )
 def test_command_parameter_descriptions_match(description: str) -> None:
@@ -59,6 +63,45 @@ def test_unrelated_parameter_description_does_not_match() -> None:
         {
             "properties": {
                 "payload": {"type": "string", "description": "A text value to inspect."}
+            }
+        },
+    )
+    assert not check_shell_exec(tool)
+
+
+@pytest.mark.parametrize(
+    "parameter",
+    ["code", "expression"],
+)
+def test_eval_name_requires_corroborating_parameter(parameter: str) -> None:
+    tool = ToolInfo(
+        "anyforge_run_triage_eval",
+        "Run triage evaluation.",
+        {"properties": {parameter: {"type": "string"}}},
+    )
+    assert check_shell_exec(tool)
+
+
+def test_eval_name_without_corroboration_does_not_match() -> None:
+    tool = ToolInfo("anyforge_run_triage_eval", "Run triage evaluation.", {})
+    assert not check_shell_exec(tool)
+
+
+def test_eval_name_with_running_code_description_matches() -> None:
+    tool = ToolInfo("custom_eval", "Run user-provided code in an isolated runtime.", {})
+    assert check_shell_exec(tool)
+
+
+def test_execute_alone_in_parameter_description_does_not_match() -> None:
+    tool = ToolInfo(
+        "preview_action",
+        "",
+        {
+            "properties": {
+                "payload": {
+                    "type": "string",
+                    "description": "Required for execute; returned by preview.",
+                }
             }
         },
     )
