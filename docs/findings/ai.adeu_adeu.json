@@ -383,7 +383,7 @@
       "fix": "Limit network destinations and require authorization for outbound requests."
     }
   ],
-  "score": 53,
+  "score": 24,
   "explanations": [
     {
       "rule_id": "CAP-003",
@@ -490,7 +490,7 @@
       "remediation": "Do not send secrets to caller-controlled destinations, minimize transmitted data, and enforce destination allowlists."
     }
   ],
-  "verdict": "FAIL",
+  "verdict": "REVIEW",
   "severity_counts": {
     "INFO": 0,
     "LOW": 3,

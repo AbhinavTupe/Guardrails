@@ -1222,7 +1222,7 @@
       "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
     }
   ],
-  "score": 100,
+  "score": 24,
   "explanations": [
     {
       "rule_id": "CAP-003",
@@ -1625,7 +1625,7 @@
       "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
     }
   ],
-  "verdict": "FAIL",
+  "verdict": "REVIEW",
   "severity_counts": {
     "INFO": 0,
     "LOW": 7,

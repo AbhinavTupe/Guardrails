@@ -1830,7 +1830,7 @@
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     }
   ],
-  "score": 61,
+  "score": 47,
   "explanations": [
     {
       "rule_id": "POI-004",
@@ -1897,7 +1897,7 @@
       "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
     }
   ],
-  "verdict": "FAIL",
+  "verdict": "REVIEW",
   "severity_counts": {
     "INFO": 0,
     "LOW": 0,

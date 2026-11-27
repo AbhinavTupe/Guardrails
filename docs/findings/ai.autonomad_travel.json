@@ -707,7 +707,7 @@
       "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
     }
   ],
-  "score": 8,
+  "score": 4,
   "explanations": [
     {
       "rule_id": "POI-005",
