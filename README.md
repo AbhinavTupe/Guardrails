@@ -1,104 +1,68 @@
 # mcp-audit
 
-mcp-audit is a local CLI that enumerates an MCP server and reports security risks
-with rule evidence and remediation guidance. It supports static tool-schema and
-description checks plus optional bounded runtime probes.
+## 1. What it is
 
-## Install
+mcp-audit is a local command-line tool that launches an MCP server, enumerates its tools, and checks tool names, descriptions, and parameter schemas for risk signals. It produces text, JSON, or a self-contained HTML report with evidence and suggested fixes.
 
-Requires Python 3.11+ and [`uv`](https://docs.astral.sh/uv/).
-
-```bash
-uv sync
-uv run mcp-audit --help
+```sh
+pip install -e .
+mcp-audit scan "python testbed/vuln_shell.py"
+mcp-audit scan --html report.html "python testbed/vuln_shell.py"
 ```
 
-## Usage
+Open `report.html` to view the HTML report.
 
-Scan a server launched by a command:
+## 2. What it checks
 
-```bash
-uv run mcp-audit scan "python testbed/vuln_shell.py"
-```
+| ID | Name | What it flags |
+|---|---|---|
+| CAP-001 | Shell command execution | Tool names or parameters that indicate shell command execution |
+| CAP-002 | File write/delete capability | File-modification tool names combined with file or path context |
+| CAP-003 | Unrestricted path parameter | String path parameters without a pattern, enum, or maximum length |
+| CAP-004 | Unrestricted URL parameter | String URL, URI, endpoint, or host parameters without a pattern or enum |
+| CAP-005 | Network access | Tool names associated with fetching, downloading, HTTP, requests, webhooks, or email |
+| POI-001 | Instruction override in description | Description text that asks an agent to ignore instructions or hide actions |
+| POI-002 | Invisible or bidi characters in description | Zero-width or bidirectional control characters |
+| POI-003 | URL in description | HTTP URLs in descriptions, with stronger severity near upload or exfiltration wording |
+| POI-004 | Hidden AI directive or sensitive target | Hidden AI tags or references to sensitive credential paths |
+| POI-005 | Abnormally long description | Descriptions longer than 1000 characters |
 
-Output a JSON report:
+## 3. Scoring
 
-```bash
-uv run mcp-audit scan --json "python testbed/vuln_shell.py"
-```
+- **PASS:** score below 10
+- **REVIEW:** score from 10 to 49
+- **FAIL:** score 50 or higher
 
-Write a self-contained HTML report:
+The first finding for a rule contributes its full confidence-adjusted severity weight. Later findings for the same rule contribute only 25% of that weight each, with each rule capped at twice its rule weight. The final score is capped at 100.
 
-```bash
-uv run mcp-audit scan --html report.html "python testbed/vuln_shell.py"
-```
+## 4. Real-world scan
 
-Enable bounded path-traversal and shell-execution probes only for a server you
-trust and run locally:
+[docs/findings.md](docs/findings.md) records 30 public servers scanned: 14 enumerated and 16 failed. The 16 failures fall into these categories: network (4; the sandbox could not reach PyPI, not a server fault), credentials (2), platform (1), launch command (3), CLI not MCP (3), sandbox policy (1), and unclassified (2).
 
-```bash
-uv run mcp-audit scan --probe "python testbed/vuln_shell.py"
-```
+A manual review checked 18 HIGH findings. It found 0 true positives and 18 false positives; the rules were tightened afterwards. The result is 0 HIGH+ findings on the 14 enumerated servers. These reports describe findings that were **flagged by heuristic**, not confirmed exploitation or security properties.
 
-Exit unsuccessfully when findings meet a severity threshold:
+## 5. Evaluation
 
-```bash
-uv run mcp-audit scan --fail-on medium "python testbed/vuln_shell.py"
-```
+[docs/evaluation.md](docs/evaluation.md) reports:
 
-Valid `--fail-on` values are `info`, `low`, `medium`, `high`, and `critical`.
+- Core: 4/4 detected categories
+- Adversarial v0: 0.500 precision / 0.167 recall
+- Adversarial v1: 1.000 precision / 0.833 recall
+- Reworded set: 2/2
+- The regression set is not held-out
 
-## Architecture
+v1 fixes were made after seeing v0 failures, and v2 rules were tightened after the public scan, so these are not held-out results.
 
-```text
-CLI
- |
- v
-Connector ---> enumerate tools/resources/prompts
- |
- v
-Static rules ---> Finding list
- |
- v
-Optional probes ---> additional Finding list
- |
- v
-Scoring + knowledge base --> text / JSON / HTML report
-```
+Known miss: `adversarial/paraphrased_override.py` requires an LLM for reliable paraphrase detection.
 
-The modules are independent: the connector launches and enumerates a server,
-rule modules classify MCP tools, probes perform bounded test calls, scoring
-summarizes findings, and the report layer renders output.
+## 6. Limitations
 
-Scoring gives the first finding for each rule its full confidence-adjusted
-severity weight. Further findings for that rule add 25% of its weight each, up
-to twice the rule's weight; the overall score remains capped at 100.
+- Results come from heuristics, not proof of exploitability.
+- Only 14 of 30 public targets were enumerated.
+- 25 of 30 targets came from the `ai.*` registry namespace, which introduces selection bias.
+- MEDIUM findings have not been manually triaged.
+- The filesystem server enforces its allowlist server-side, so CAP-003 hits are expected.
 
-See a committed [sample HTML report](docs/sample-report.html).
+## 7. Responsible use
 
-## Evaluation
-
-The local testbed evaluation covers static findings followed by the optional
-probe path. See [the evaluation report](docs/evaluation.md) for category TP,
-FP, FN, precision, and recall. The current result is 4 TP, 0 FP, 0 FN,
-with 1.000 precision and 1.000 recall.
-
-## Public-scan summary
-
-The latest public-target report scanned 3 targets, successfully enumerated 3,
-and found at least one HIGH-or-higher finding on 66.7% of them. Full tables and
-tool findings are available in [Public Target Findings](docs/findings.md).
-
-## Limitations
-
-The testbed is tiny and the rules and labels were created by the same author.
-Static checks can produce false positives and probes cover only selected path
-and command behaviors. Reports are risk signals, not proof of exploitability or
-a complete security certification.
-
-## Responsible use
-
-Only scan systems and MCP servers you are authorized to run. Use probes only
-locally and on servers you trust. The probes use a temporary sandbox and do not
-run against real user files or secrets. The vulnerable test servers in
-`testbed/` must not be exposed to a network or used with real credentials.
+Scanning launches the target, so run unknown servers only in a throwaway sandbox. See [docs/SANDBOX.md](docs/SANDBOX.md). Reports are heuristic signals; disclose real findings privately to maintainers.
