@@ -2,14 +2,14 @@
 
 | Server | Tools found | Score | Verdict | CRITICAL | HIGH | MEDIUM | LOW | INFO | Rules (count) | Failure category | Failure evidence |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---|---|---|
-| ai.achromat/mcp-server | 2 | 23 | REVIEW | 0 | 1 | 0 | 1 | 0 | POI-004 x 1, POI-005 x 1 | - | - |
+| ai.achromat/mcp-server | 2 | 2 | PASS | 0 | 0 | 0 | 1 | 0 | POI-005 x 1 | - | - |
 | ai.achurch/church | 10 | 0 | PASS | 0 | 0 | 0 | 0 | 0 | - | - | - |
 | ai.adeu/adeu | 9 | 24 | REVIEW | 0 | 0 | 10 | 3 | 0 | CAP-003 x 10, CAP-005 x 2, POI-005 x 1 | - | - |
 | ai.agentutility/mcp-browser-workflow | - | - | failed | - | - | - | - | - | - | requires credentials | Startup requires the X402_PRIVATE_KEY environment variable. |
 | ai.agentutility/mcp-mediakit | - | - | failed | - | - | - | - | - | - | requires credentials | Startup requires the X402_PRIVATE_KEY environment variable. |
 | ai.ankimcp/anki-mcp-server | - | - | failed | - | - | - | - | - | - | launch command incomplete | The CLI requires an mcp/stdio argument that is absent from the launch command. |
-| ai.anyforge/anyforge | 285 | 100 | FAIL | 0 | 16 | 27 | 29 | 0 | CAP-003 x 25, POI-005 x 18, CAP-001 x 8, CAP-005 x 8, POI-004 x 8, POI-003 x 3, CAP-002 x 2 | - | - |
-| ai.aquex/reasonbook | 15 | 47 | REVIEW | 0 | 1 | 7 | 0 | 0 | CAP-003 x 6, CAP-004 x 1, POI-004 x 1 | - | - |
+| ai.anyforge/anyforge | 285 | 45 | REVIEW | 0 | 0 | 27 | 29 | 0 | CAP-003 x 25, POI-005 x 18, CAP-005 x 8, POI-003 x 3, CAP-002 x 2 | - | - |
+| ai.aquex/reasonbook | 15 | 26 | REVIEW | 0 | 0 | 7 | 0 | 0 | CAP-003 x 6, CAP-004 x 1 | - | - |
 | ai.aquex/stage1 | - | - | failed | - | - | - | - | - | - | CLI printed help, not MCP | The launched CLI printed help instead of starting an MCP server. |
 | ai.autonomad/travel | 12 | 4 | PASS | 0 | 0 | 0 | 5 | 0 | POI-005 x 4, CAP-005 x 1 | - | - |
 | ai.cappz/cappz-market | - | - | failed | - | - | - | - | - | - | CLI printed help, not MCP | The launched CLI printed help instead of starting an MCP server. |
@@ -28,7 +28,7 @@
 | ai.memcell/memcell | - | - | failed | - | - | - | - | - | - | unclassified | The saved scan error is: MCP server launch or protocol error: unhandled errors in a TaskGroup (1 sub-exception). |
 | ai.mroffice/office | 11 | 8 | PASS | 0 | 0 | 1 | 0 | 0 | CAP-004 x 1 | - | - |
 | fetch | - | - | failed | - | - | - | - | - | - | network error | uv could not reach PyPI while resolving the package. |
-| filesystem | - | - | failed | - | - | - | - | - | - | unclassified | MCP server launch or protocol error: unhandled errors in a TaskGroup (1 sub-exception) |
+| filesystem | 16 | 30 | REVIEW | 0 | 0 | 19 | 0 | 0 | CAP-003 x 17, CAP-002 x 2 | - | - |
 | git | - | - | failed | - | - | - | - | - | - | network error | uv could not reach PyPI while resolving the package. |
 | memory | 9 | 0 | PASS | 0 | 0 | 0 | 0 | 0 | - | - | - |
 | time | - | - | failed | - | - | - | - | - | - | network error | uv could not reach PyPI while resolving the package. |
@@ -37,7 +37,7 @@
 
 | Scanned | Enumerated | Failed | % with HIGH+ (enumerated servers denominator) |
 |---:|---:|---:|---:|
-| 30 | 13 | 17 | 23.1% |
+| 30 | 14 | 16 | 0.0% |
 
 ### Failure breakdown
 
@@ -49,4 +49,4 @@
 | blocked by sandbox policy | 1 |
 | launch command incomplete | 3 |
 | CLI printed help, not MCP | 3 |
-| unclassified | 3 |
+| unclassified | 2 |

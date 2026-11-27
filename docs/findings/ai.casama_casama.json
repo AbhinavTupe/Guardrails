@@ -597,7 +597,7 @@
       "fix": "Remove the URL or verify that it is an expected destination before using the tool."
     }
   ],
-  "score": 35,
+  "score": 23,
   "explanations": [
     {
       "rule_id": "CAP-003",

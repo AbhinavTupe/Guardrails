@@ -1,4 +1,5 @@
 {
   "name": "ai.keepstate/ks",
-  "error": "MCP server launch or protocol error: unhandled errors in a TaskGroup (1 sub-exception)"
+  "error": "MCP server launch or protocol error: unhandled errors in a TaskGroup (1 sub-exception)",
+  "failure_reason": "not an MCP server (protocol error)"
 }

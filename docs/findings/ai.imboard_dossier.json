@@ -227,7 +227,7 @@
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     }
   ],
-  "score": 40,
+  "score": 16,
   "explanations": [
     {
       "rule_id": "CAP-003",
