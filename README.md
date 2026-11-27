@@ -70,6 +70,10 @@ The modules are independent: the connector launches and enumerates a server,
 rule modules classify MCP tools, probes perform bounded test calls, scoring
 summarizes findings, and the report layer renders output.
 
+Scoring gives the first finding for each rule its full confidence-adjusted
+severity weight. Further findings for that rule add 25% of its weight each, up
+to twice the rule's weight; the overall score remains capped at 100.
+
 See a committed [sample HTML report](docs/sample-report.html).
 
 ## Evaluation

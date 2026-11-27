@@ -13,3 +13,11 @@ Review the generated `docs/findings.md` and `docs/findings/*.json`, then commit 
 ```sh
 git add docs/findings* && git commit -m "Update public scan findings"
 ```
+
+To re-scan selected target names, pass a comma-separated `--only` list. The report
+is rebuilt from every JSON file in `docs/findings/`, preserving findings for
+targets not included in that run:
+
+```sh
+python scripts/scan_public.py --i-understand --only name1,name2
+```

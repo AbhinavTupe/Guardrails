@@ -34,12 +34,13 @@ def run_scan(
     *,
     env: Mapping[str, str] | None = None,
     cwd: str | Path | None = None,
+    enumeration_timeout: float = 30.0,
 ) -> ScanResult:
     """Enumerate a server and apply the CLI's standard rule and probe path."""
     server = (
-        asyncio.run(enumerate_server(command, env=env, cwd=cwd))
+        asyncio.run(enumerate_server(command, timeout=enumeration_timeout, env=env, cwd=cwd))
         if env is not None or cwd is not None
-        else asyncio.run(enumerate_server(command))
+        else asyncio.run(enumerate_server(command, timeout=enumeration_timeout))
     )
     load_all_rules()
     findings = run_rules(server.tools)
