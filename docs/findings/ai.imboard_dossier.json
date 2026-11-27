@@ -1,0 +1,281 @@
+{
+  "server_command": "npx -y @ai-dossier/mcp-server@1.0.4",
+  "tools": [
+    {
+      "name": "verify_dossier",
+      "description": "Security verification - Verify integrity (checksum) and authenticity (signature) of a dossier. Returns pass/fail with stage details.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to dossier file (.ds.md)"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "name": "read_dossier",
+      "description": "Read and parse a dossier file. Returns metadata and content. Should be called AFTER verify_dossier passes.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to dossier file (.ds.md)"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "name": "list_dossiers",
+      "description": "Discover available dossiers in a directory. Scans for *.ds.md files and returns metadata.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Directory to search (default: current working directory)"
+          },
+          "recursive": {
+            "type": "boolean",
+            "description": "Search subdirectories recursively (default: true)"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_dossiers",
+      "description": "Search the dossier registry for available dossiers by keyword. Returns matching dossiers with metadata.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search keywords"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter by category (devops, database, development, security, etc.)"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "resolve_graph",
+      "description": "Resolve a dossier dependency graph into an execution plan. Reads relationships (preceded_by, followed_by, conflicts_with) and produces a DAG with ordered phases, parallel groups, and conflict detection.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "dossier": {
+            "type": "string",
+            "description": "Path to dossier file (.ds.md) or registry name"
+          }
+        },
+        "required": [
+          "dossier"
+        ]
+      }
+    },
+    {
+      "name": "verify_graph",
+      "description": "Batch security verification for a dossier dependency graph. Verifies all dossiers in a resolved graph and returns an aggregate security report with per-dossier breakdown and overall recommendation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "graph_id": {
+            "type": "string",
+            "description": "ID of a previously resolved graph (from resolve_graph)"
+          },
+          "dossier": {
+            "type": "string",
+            "description": "Path to dossier file (.ds.md) or registry name. Resolves and verifies in one shot."
+          }
+        }
+      }
+    },
+    {
+      "name": "start_journey",
+      "description": "Start a journey session from a resolved and verified graph. Creates a session, returns the first step's dossier content with any injected context. Call step_complete after executing each step.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "graph_id": {
+            "type": "string",
+            "description": "ID of a previously resolved graph (from resolve_graph)"
+          }
+        },
+        "required": [
+          "graph_id"
+        ]
+      }
+    },
+    {
+      "name": "step_complete",
+      "description": "Mark the current journey step as complete or failed. Advances to the next step and returns its dossier content with injected context from previous outputs. Returns a summary when the last step completes or a step fails.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "description": "Journey session ID (from start_journey)"
+          },
+          "outputs": {
+            "type": "object",
+            "description": "Key-value outputs collected during this step (e.g. { cluster_arn: \"arn:...\" })"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "failed"
+            ],
+            "description": "Whether this step succeeded or failed"
+          }
+        },
+        "required": [
+          "journey_id",
+          "status"
+        ]
+      }
+    },
+    {
+      "name": "get_journey_status",
+      "description": "Get the current state of a journey session: completed steps, current step, remaining steps, and collected outputs.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "description": "Journey session ID (from start_journey)"
+          }
+        },
+        "required": [
+          "journey_id"
+        ]
+      }
+    },
+    {
+      "name": "cancel_journey",
+      "description": "Cancel an active journey session. Returns a summary of what completed before cancellation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "description": "Journey session ID (from start_journey)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional reason for cancellation"
+          }
+        },
+        "required": [
+          "journey_id"
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "list_dossiers",
+      "evidence": "tool name: list_dossiers; parameter 'path' schema: {\"description\": \"Directory to search (default: current working directory)\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "read_dossier",
+      "evidence": "tool name: read_dossier; parameter 'path' schema: {\"description\": \"Path to dossier file (.ds.md)\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "resolve_graph",
+      "evidence": "tool name: resolve_graph; parameter 'dossier' schema: {\"description\": \"Path to dossier file (.ds.md) or registry name\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "verify_dossier",
+      "evidence": "tool name: verify_dossier; parameter 'path' schema: {\"description\": \"Path to dossier file (.ds.md)\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "verify_graph",
+      "evidence": "tool name: verify_graph; parameter 'dossier' schema: {\"description\": \"Path to dossier file (.ds.md) or registry name. Resolves and verifies in one shot.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    }
+  ],
+  "score": 16,
+  "explanations": [
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "list_dossiers",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "read_dossier",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "resolve_graph",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "verify_dossier",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "verify_graph",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    }
+  ],
+  "verdict": "REVIEW",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 0,
+    "MEDIUM": 5,
+    "HIGH": 0,
+    "CRITICAL": 0
+  }
+}

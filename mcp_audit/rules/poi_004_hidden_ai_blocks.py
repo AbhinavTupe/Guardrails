@@ -10,9 +10,14 @@ from mcp_audit.rules._poi_common import (
 )
 from mcp_audit.rules.registry import register
 
-TAG_PATTERN = re.compile(r"<important>|<system>|SYSTEM\s*:", re.IGNORECASE)
+TAG_PATTERN = re.compile(
+    r"<(?:important|system|assistant|user)\b[^>]*>"
+    r"|<\|\s*(?:system|assistant|user)\s*\|>"
+    r"|^[ \t]*(?:system|assistant|user)\s*:",
+    re.IGNORECASE | re.MULTILINE,
+)
 SENSITIVE_PATTERN = re.compile(
-    r"~/\.ssh|id_rsa|\.env|credentials",
+    r"~/\.ssh|id_rsa|\.env",
     re.IGNORECASE,
 )
 

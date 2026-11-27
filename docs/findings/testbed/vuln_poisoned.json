@@ -69,7 +69,7 @@
       "fix": "Remove hidden AI directives and references to sensitive files or credentials."
     }
   ],
-  "score": 89,
+  "score": 100,
   "explanations": [
     {
       "rule_id": "POI-001",

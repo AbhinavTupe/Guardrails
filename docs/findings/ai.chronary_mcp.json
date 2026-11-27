@@ -1,0 +1,56 @@
+{
+  "server_command": "npx -y @chronary/mcp@1.8.5",
+  "tools": [
+    {
+      "name": "sign_up_anonymous",
+      "description": "Sign up for Chronary without an email and get a working calendar API key. This server was started without CHRONARY_API_KEY, so this is the only tool until you call it. It creates a claimable organization: an agent, an Organization key that works at once (Sandbox plan: small monthly quotas; no email, no webhook endpoints), and a one-time claim_url. Give claim_url to the person who should own the calendar: opening it while signed in to the Chronary console moves the agent, calendar and events into their account. Unclaimed, the key stops working and everything is deleted after 72 hours (expires_at). After it succeeds the full set of calendar tools is available in this session. Calling it accepts the Terms of Service (https://chronary.ai/terms) for the person or organization you act for.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "agent_name": {
+            "description": "Display name for the new agent (default \"MCP agent\").",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "tos_version": {
+            "description": "Terms of Service version you accept. Omit it to accept the current version (read from GET /v1/auth/terms/current). A version you pass is never replaced: if it is out of date, the tool returns the current one.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        }
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "POI-003",
+      "severity": "LOW",
+      "confidence": 0.9,
+      "tool_name": "sign_up_anonymous",
+      "evidence": "accepts the Terms of Service (https://chronary.ai/terms)",
+      "fix": "Remove the URL or verify that it is an expected destination before using the tool."
+    }
+  ],
+  "score": 3,
+  "explanations": [
+    {
+      "rule_id": "POI-003",
+      "tool_name": "sign_up_anonymous",
+      "pattern_id": "MCP-KB-017",
+      "title": "Secrets embedded in descriptions",
+      "why_it_matters": "Tool descriptions may be exposed to clients, logs, or model context and are not a safe place for credentials.",
+      "remediation": "Remove credentials from descriptions, rotate exposed secrets, and retrieve secrets through a protected mechanism."
+    }
+  ],
+  "verdict": "PASS",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 1,
+    "MEDIUM": 0,
+    "HIGH": 0,
+    "CRITICAL": 0
+  }
+}

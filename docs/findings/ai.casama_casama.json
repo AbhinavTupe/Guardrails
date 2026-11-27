@@ -1,0 +1,651 @@
+{
+  "server_command": "npx -y @casama/mcp@0.2.3",
+  "tools": [
+    {
+      "name": "search_docs",
+      "description": "Keyword search over docs.casama.ai (guides, self-hosting, the API, CLI, SDKs, plugins, webhooks, A2A, bot templates, contributing). Returns the best-matching sections with their address; read a whole page with read_doc.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 500
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "read_doc",
+      "description": "One docs page as markdown, by path or address: \"/develop/plugins\", \"develop/api.md\" or \"https://docs.casama.ai/guide/skills\". Pass section to get one ## section only.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "section": {
+            "description": "A ## heading on the page, e.g. \"Secrets\"",
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "page"
+        ]
+      }
+    },
+    {
+      "name": "list_doc_pages",
+      "description": "Every page on docs.casama.ai with its title and address.",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_api_operation",
+      "description": "Find operations in the Casama HTTP API (OpenAPI 3.1) and show their parameters, request body and responses as types. Query by operationId (\"createBot\"), \"METHOD /path\" (\"POST /v1/conversations/{id}/messages\", concrete ids work too) or keywords (\"cancel run\").",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 300
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "check_plugin",
+      "description": "Check an Agent Plugins 1.0 folder (plugin.json, mcp.json, skills/) on this computer the way Casama checks it at install: errors (refused), warnings (skipped or ignored) and tips.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The plugin folder, absolute or relative to where the server runs"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "name": "gallery_search",
+      "description": "Search the Casama gallery (gallery.casama.ai) for ready-made skills, apps, routines, bots, plugins, starter sets and looks before writing a new one. Returns the best matches with what each can access, what it needs and its page. Add one in Casama from its page, or start from it with `casama init --from-gallery bot/<id>` or `plugin/<id>`.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "types": {
+            "maxItems": 9,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "skill",
+                "app",
+                "routine",
+                "bot",
+                "plugin",
+                "set",
+                "theme",
+                "scheme",
+                "wallpaper"
+              ]
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "list_workspaces",
+      "description": "Casama workspaces you belong to, with your role.",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_bots",
+      "description": "Bots in a workspace (default: your first workspace), with their current status.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "workspace": {
+            "description": "Workspace slug, name or id",
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "ask_bot",
+      "description": "Send a message to a Casama bot and wait for its reply. The bot can use its own computer and tools; risky actions may wait for the person's approval (see what_needs_me and list_approvals). Pass conversation_id to continue a thread. Assistants that can't wait long should pass wait_seconds: if the bot is still working when it runs out, the answer says so with a run_id (follow up with get_run), and the person gets a notification when it's done.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "bot": {
+            "type": "string",
+            "description": "Bot name or id"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "workspace": {
+            "type": "string"
+          },
+          "wait_seconds": {
+            "description": "How long to wait for the reply, 5\u2013120 seconds (default: up to 10 minutes)",
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 120
+          }
+        },
+        "required": [
+          "bot",
+          "message"
+        ]
+      }
+    },
+    {
+      "name": "react_to_message",
+      "description": "React to a message in a conversation with one emoji (D-331), or take your reaction back. Without message_id it reacts to the bot's latest reply. One reaction per person per message: another emoji replaces yours. The bot sees it the next time it works in that chat; a \ud83d\udc4d or \ud83d\udc4e tells it whether the reply worked.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "bot": {
+            "type": "string",
+            "description": "Bot name or id"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "emoji": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Exactly one emoji, e.g. \ud83d\udc4d"
+          },
+          "message_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "remove": {
+            "description": "Take your reaction back instead",
+            "type": "boolean"
+          },
+          "workspace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bot",
+          "conversation_id",
+          "emoji"
+        ]
+      }
+    },
+    {
+      "name": "get_run",
+      "description": "A run's status, cost and its recent events (tool calls, outputs, errors).",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "run_id"
+        ]
+      }
+    },
+    {
+      "name": "list_approvals",
+      "description": "Actions waiting for a person's approval in a workspace.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "decide_approval",
+      "description": "Approve or deny a pending action. The bot continues (or skips the step) right away.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "deny"
+            ]
+          }
+        },
+        "required": [
+          "approval_id",
+          "decision"
+        ]
+      }
+    },
+    {
+      "name": "what_needs_me",
+      "description": "What is waiting for the person in Casama: approvals (a bot wants an OK before a risky step), take-overs (a bot needs the person to do something on its computer) and suggestions. Each comes with a link that opens it in Casama. Approvals are reviewed there.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_routines",
+      "description": "The person's routines: things a bot does on a schedule or a trigger (a morning brief, a weekly report). Optionally only one bot's.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "bot": {
+            "description": "Only this bot's routines (name or id)",
+            "type": "string"
+          },
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "run_routine",
+      "description": "Start one of the person's routines now, by name or id. It runs like a scheduled run; the result arrives in Casama and as a notification. Pass request_id so a retry within a minute doesn't start it twice.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "routine": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Routine name or id"
+          },
+          "bot": {
+            "description": "The routine's bot, when names repeat",
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "workspace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "routine"
+        ]
+      }
+    },
+    {
+      "name": "list_sites",
+      "description": "Pages published on the web at their own address in a workspace, with their hosts and states.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_domains",
+      "description": "Connected and bought domains in a workspace: the site each shows and its state (live, waiting_dns, waiting_cert, paused, needs_attention).",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_domain",
+      "description": "A domain's hosts and states, the DNS records to add with what DNS shows now, renewal details and history.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "description": "Domain id or name"
+          },
+          "workspace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain"
+        ]
+      }
+    },
+    {
+      "name": "check_domain",
+      "description": "Check a domain's DNS and certificate now instead of waiting for the next check (admins; at most once every 10 seconds).",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "workspace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain"
+        ]
+      }
+    },
+    {
+      "name": "connect_domain",
+      "description": "Connect a domain the workspace already owns (bakery.com, www.bakery.com or shop.bakery.com), optionally showing a published site. Answers the DNS records to add at the domain's DNS company (admins).",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 253
+          },
+          "page_id": {
+            "description": "A published site's page id",
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "workspace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    {
+      "name": "search_domains",
+      "description": "Domain names for a few words or a name, with availability, the first year's price and the renewal price (before tax). Only a person can buy one, in the Casama app.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "workspace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "list_packs",
+      "description": "Packs installed in a workspace: plugins that brought bots, skills, routines, apps and looks.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "preview_pack",
+      "description": "What a pack from a GitHub link (or a reviewed pack from the directory, by id) would add: bots, skills, routines, apps, looks, tools, the questions it asks, what it can reach and the commit to install.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "url": {
+            "description": "A GitHub repository or folder",
+            "type": "string"
+          },
+          "gallery_id": {
+            "description": "A pack from the plugin directory",
+            "type": "string"
+          },
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "install_pack",
+      "description": "Install a pack in a workspace, pinned to the commit preview_pack showed. Show the person the preview first. Secrets aren't taken here: the person adds them in the app. Packs that aren't reviewed start their routines switched off; the workspace's gallery rules apply.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "gallery_id": {
+            "type": "string"
+          },
+          "inputs": {
+            "description": "Answers to its questions",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "skip": {
+            "description": "Items to leave out",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "id"
+              ]
+            }
+          },
+          "workspace": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "check_plugin",
+      "evidence": "tool name: check_plugin; parameter 'path' schema: {\"description\": \"The plugin folder, absolute or relative to where the server runs\", \"minLength\": 1, \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-004",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "install_pack",
+      "evidence": "tool name: install_pack; parameter 'url' schema: {\"type\": \"string\"}",
+      "fix": "Validate URL inputs against an allowlist of permitted destinations."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "preview_pack",
+      "evidence": "tool name: preview_pack; parameter 'gallery_id' schema: {\"description\": \"A pack from the plugin directory\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-004",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "preview_pack",
+      "evidence": "tool name: preview_pack; parameter 'url' schema: {\"description\": \"A GitHub repository or folder\", \"type\": \"string\"}",
+      "fix": "Validate URL inputs against an allowlist of permitted destinations."
+    },
+    {
+      "rule_id": "POI-003",
+      "severity": "LOW",
+      "confidence": 0.9,
+      "tool_name": "read_doc",
+      "evidence": "\"/develop/plugins\", \"develop/api.md\" or \"https://docs.casama.ai/guide/skills\".",
+      "fix": "Remove the URL or verify that it is an expected destination before using the tool."
+    }
+  ],
+  "score": 23,
+  "explanations": [
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "check_plugin",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-004",
+      "tool_name": "install_pack",
+      "pattern_id": "MCP-KB-019",
+      "title": "Unrestricted URL parameter",
+      "why_it_matters": "A caller-controlled URL can expose the server to untrusted content and unintended network destinations.",
+      "remediation": "Prefer fixed destinations or strict allowlists and validate URL scheme, host, and resolved address."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "preview_pack",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-004",
+      "tool_name": "preview_pack",
+      "pattern_id": "MCP-KB-019",
+      "title": "Unrestricted URL parameter",
+      "why_it_matters": "A caller-controlled URL can expose the server to untrusted content and unintended network destinations.",
+      "remediation": "Prefer fixed destinations or strict allowlists and validate URL scheme, host, and resolved address."
+    },
+    {
+      "rule_id": "POI-003",
+      "tool_name": "read_doc",
+      "pattern_id": "MCP-KB-017",
+      "title": "Secrets embedded in descriptions",
+      "why_it_matters": "Tool descriptions may be exposed to clients, logs, or model context and are not a safe place for credentials.",
+      "remediation": "Remove credentials from descriptions, rotate exposed secrets, and retrieve secrets through a protected mechanism."
+    }
+  ],
+  "verdict": "REVIEW",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 1,
+    "MEDIUM": 4,
+    "HIGH": 0,
+    "CRITICAL": 0
+  }
+}

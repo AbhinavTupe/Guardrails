@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import re
 import shlex
@@ -16,17 +17,31 @@ from typing import Any
 
 from mcp_audit.cli import run_scan
 from mcp_audit.connector import ConnectorError
-from mcp_audit.models import ScanResult
+from mcp_audit.models import Finding, ScanResult, Severity, ToolInfo
+from mcp_audit.scoring import score_findings
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS_PATH = ROOT / "docs" / "targets.json"
 FINDINGS_DIR = ROOT / "docs" / "findings"
 REPORT_PATH = ROOT / "docs" / "findings.md"
-TARGET_TIMEOUT_SECONDS = 60.0
+FAILURE_NOTES_PATH = ROOT / "docs" / "failure_notes.json"
+ENUMERATION_TIMEOUT_SECONDS = 120.0
+TARGET_TIMEOUT_SECONDS = 150.0
+FAILURE_CATEGORIES = (
+    "network error",
+    "requires credentials",
+    "incompatible platform",
+    "blocked by sandbox policy",
+    "launch command incomplete",
+    "CLI printed help, not MCP",
+    "unclassified",
+)
 WARNING = (
     "WARNING: This launches third-party code. Run only in a sandbox; "
     "scanned servers must be trusted and no probes are enabled."
 )
+
+logging.getLogger("mcp.client.stdio").setLevel(logging.CRITICAL)
 
 
 def build_minimal_environment(
@@ -45,6 +60,11 @@ def build_minimal_environment(
         "PATH": path,
         "HOME": str(home_path),
         "npm_config_ignore_scripts": "true",
+        **{
+            key: source[key]
+            for key in ("UV_NATIVE_TLS", "UV_HTTP_TIMEOUT")
+            if key in source
+        },
     }
 
 
@@ -62,6 +82,8 @@ class TargetResult:
     result: ScanResult | None = None
     error: str | None = None
     timed_out: bool = False
+    failure_reason: str | None = None
+    failure_evidence: str | None = None
 
 
 def scrub_text(text: str) -> str:
@@ -111,26 +133,99 @@ def severity_counts(result: ScanResult) -> dict[str, int]:
     }
 
 
-def top_rule_ids(result: ScanResult, limit: int = 3) -> str:
-    rule_counts: dict[str, int] = {}
+def rule_counts(result: ScanResult) -> str:
+    counts: dict[str, int] = {}
     for finding in result.findings:
-        rule_counts[finding.rule_id] = rule_counts.get(finding.rule_id, 0) + 1
-    ordered = sorted(rule_counts, key=lambda rule_id: (-rule_counts[rule_id], rule_id))
-    return ", ".join(ordered[:limit]) if ordered else "-"
+        counts[finding.rule_id] = counts.get(finding.rule_id, 0) + 1
+    ordered = sorted(counts, key=lambda rule_id: (-counts[rule_id], rule_id))
+    return ", ".join(f"{rule_id} x {counts[rule_id]}" for rule_id in ordered) or "-"
+
+
+def classify_failure_reason(error: str | None, timed_out: bool = False) -> str:
+    if timed_out:
+        return "timeout"
+    message = (error or "").lower()
+    if any(token in message for token in ("timed out", "timeout")):
+        return "timeout"
+    if any(
+        token in message
+        for token in (
+            "operation not permitted",
+            "permission denied",
+            "access denied",
+            "sandbox",
+            "blocked by policy",
+            "not allowed by policy",
+        )
+    ):
+        return "blocked by sandbox policy"
+    if any(
+        token in message
+        for token in (
+            "econnrefused",
+            "econnreset",
+            "enotfound",
+            "eai_again",
+            "network is unreachable",
+            "connection refused",
+            "connection reset",
+            "getaddrinfo failed",
+            "temporary failure in name resolution",
+            "name or service not known",
+            "could not resolve",
+            "certificate verify failed",
+            "ssl error",
+        )
+    ):
+        return "network error"
+    if any(
+        token in message
+        for token in (
+            "protocol error",
+            "json-rpc",
+            "jsonrpc",
+            "failed to parse",
+            "invalid json",
+            "expecting value",
+            "connection closed",
+        )
+    ):
+        return "not an MCP server (protocol error)"
+    return "launch error"
+
+
+def get_failure_reason(item: TargetResult) -> str:
+    if item.result is not None:
+        return "-"
+    if item.failure_reason in FAILURE_CATEGORIES:
+        return item.failure_reason
+    automatic_reason = item.failure_reason or classify_failure_reason(item.error, item.timed_out)
+    if automatic_reason in {"network error", "blocked by sandbox policy"}:
+        return automatic_reason
+    return "unclassified"
+
+
+def get_failure_evidence(item: TargetResult) -> str:
+    if item.result is not None:
+        return "-"
+    return scrub_text(item.failure_evidence or item.error or "No error details recorded")
 
 
 def build_markdown_table(results: list[TargetResult]) -> str:
     lines = [
         (
             "| Server | Tools found | Score | Verdict | CRITICAL | HIGH | "
-            "MEDIUM | LOW | INFO | Top rule IDs |"
+            "MEDIUM | LOW | INFO | Rules (count) | Failure category | Failure evidence |"
         ),
-        "|---|---:|---:|---|---:|---:|---:|---:|---:|---|",
+        "|---|---:|---:|---|---:|---:|---:|---:|---:|---|---|---|",
     ]
     for item in results:
         if item.result is None:
-            status = "timeout" if item.timed_out else "failed"
-            lines.append(f"| {scrub_text(item.name)} | - | - | {status} | - | - | - | - | - | - |")
+            status = "timeout" if get_failure_reason(item) == "timeout" else "failed"
+            lines.append(
+                f"| {scrub_text(item.name)} | - | - | {status} | - | - | - | - | - | "
+                f"- | {get_failure_reason(item)} | {get_failure_evidence(item)} |"
+            )
             continue
         result = item.result
         counts = severity_counts(result)
@@ -138,7 +233,7 @@ def build_markdown_table(results: list[TargetResult]) -> str:
             f"| {scrub_text(item.name)} | {len(result.tools)} | {result.score} | "
             f"{result.verdict} | {counts['CRITICAL']} | {counts['HIGH']} | "
             f"{counts['MEDIUM']} | {counts['LOW']} | {counts['INFO']} | "
-            f"{top_rule_ids(result)} |"
+            f"{rule_counts(result)} | - | - |"
         )
     return "\n".join(lines)
 
@@ -158,11 +253,21 @@ def build_totals(results: list[TargetResult]) -> tuple[int, int, int, float]:
 
 def build_totals_markdown(results: list[TargetResult]) -> str:
     scanned, enumerated, failed, percent = build_totals(results)
+    reason_counts = {category: 0 for category in FAILURE_CATEGORIES}
+    for item in results:
+        if item.result is None:
+            reason_counts[get_failure_reason(item)] += 1
+    failures = "\n".join(
+        f"| {category} | {reason_counts[category]} |" for category in FAILURE_CATEGORIES
+    )
     return (
         "\n\n## Totals\n\n"
-        "| Scanned | Enumerated | Failed | % with at least one HIGH+ finding |\n"
+        "| Scanned | Enumerated | Failed | % with HIGH+ (enumerated servers denominator) |\n"
         "|---:|---:|---:|---:|\n"
-        f"| {scanned} | {enumerated} | {failed} | {percent:.1f}% |"
+        f"| {scanned} | {enumerated} | {failed} | {percent:.1f}% |\n\n"
+        "### Failure breakdown\n\n"
+        "| Category | Servers |\n|---|---:|\n"
+        f"{failures}"
     )
 
 
@@ -183,8 +288,16 @@ def scan_target(target: dict[str, object]) -> TargetResult:
             tempfile.TemporaryDirectory(prefix="mcp-audit-public-cwd-") as cwd,
         ):
             env = build_minimal_environment(home=home)
+            prepare_relative_directories(command, Path(cwd))
             executor = ThreadPoolExecutor(max_workers=1)
-            future = executor.submit(run_scan, command, False, env=env, cwd=cwd)
+            future = executor.submit(
+                run_scan,
+                command,
+                False,
+                env=env,
+                cwd=cwd,
+                enumeration_timeout=ENUMERATION_TIMEOUT_SECONDS,
+            )
             try:
                 result = future.result(timeout=TARGET_TIMEOUT_SECONDS)
             except FuturesTimeoutError:
@@ -192,16 +305,48 @@ def scan_target(target: dict[str, object]) -> TargetResult:
                 return TargetResult(
                     name=name,
                     timed_out=True,
-                    error="Timed out after 60 seconds",
+                    error=f"Timed out after {TARGET_TIMEOUT_SECONDS:g} seconds",
+                    failure_reason="timeout",
                 )
+            except Exception:
+                executor.shutdown(wait=True)
+                raise
             executor.shutdown(wait=True)
             return TargetResult(name=name, result=result)
     except ConnectorError as exc:
-        return TargetResult(name=name, error=scrub_text(str(exc)))
+        error = scrub_text(str(exc))
+        return TargetResult(
+            name=name,
+            error=error,
+            timed_out=classify_failure_reason(error) == "timeout",
+            failure_reason=classify_failure_reason(error),
+        )
     except TimeoutError:
-        return TargetResult(name=name, timed_out=True, error="Timed out after 60 seconds")
+        return TargetResult(
+            name=name,
+            timed_out=True,
+            error=f"Timed out after {TARGET_TIMEOUT_SECONDS:g} seconds",
+            failure_reason="timeout",
+        )
     except Exception as exc:
-        return TargetResult(name=name, error=scrub_text(str(exc)))
+        error = scrub_text(str(exc))
+        return TargetResult(name=name, error=error, failure_reason=classify_failure_reason(error))
+
+
+def prepare_relative_directories(command: str, cwd: Path) -> None:
+    base = cwd.resolve()
+    for argument in shlex.split(command)[1:]:
+        if not argument.startswith(("./", "../", ".\\", "..\\")):
+            continue
+        relative_path = Path(argument)
+        if relative_path.is_absolute():
+            continue
+        target_path = (base / relative_path).resolve()
+        try:
+            target_path.relative_to(base)
+        except ValueError:
+            continue
+        target_path.mkdir(parents=True, exist_ok=True)
 
 
 def save_outputs(results: list[TargetResult]) -> None:
@@ -211,16 +356,129 @@ def save_outputs(results: list[TargetResult]) -> None:
         output_path = FINDINGS_DIR / f"{safe_name}.json"
         if item.result is not None:
             payload: dict[str, object] = scrub_data(item.result.to_dict())
+            payload["name"] = scrub_text(item.name)
         else:
             payload = {
                 "name": scrub_text(item.name),
                 "error": scrub_text(
                     item.error
-                    or ("Timed out after 60 seconds" if item.timed_out else "Unknown error")
+                    or (
+                        f"Timed out after {TARGET_TIMEOUT_SECONDS:g} seconds"
+                        if item.timed_out
+                        else "Unknown error"
+                    )
                 ),
+                "failure_reason": get_failure_reason(item),
             }
         output_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    REPORT_PATH.write_text(build_findings_markdown(results), encoding="utf-8")
+    merged_results = load_saved_results()
+    for item in merged_results:
+        if item.result is None:
+            continue
+        safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", item.name).strip("._") or "target"
+        output_path = FINDINGS_DIR / f"{safe_name}.json"
+        payload = json.loads(output_path.read_text(encoding="utf-8"))
+        payload["score"] = item.result.score
+        payload["verdict"] = item.result.verdict
+        output_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    REPORT_PATH.write_text(build_findings_markdown(merged_results), encoding="utf-8")
+
+
+def load_saved_results() -> list[TargetResult]:
+    FINDINGS_DIR.mkdir(parents=True, exist_ok=True)
+    target_names = {
+        (
+            re.sub(r"[^A-Za-z0-9_.-]+", "_", str(target["name"])).strip("._") or "target"
+        ): str(target["name"])
+        for target in load_targets()
+    }
+    failure_notes = load_failure_notes()
+    results: list[TargetResult] = []
+    for path in sorted(FINDINGS_DIR.glob("*.json")):
+        if path.stem not in target_names:
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError(f"{path} must contain a JSON object")
+        name = target_names[path.stem]
+        note = failure_notes.get(name)
+        if "error" in payload:
+            error = str(payload["error"])
+            timed_out = payload.get("failure_reason") == "timeout"
+            results.append(
+                TargetResult(
+                    name=name,
+                    error=error,
+                    timed_out=timed_out,
+                    failure_reason=(
+                        note["category"]
+                        if note is not None
+                        else str(payload.get("failure_reason", ""))
+                        or classify_failure_reason(error, timed_out)
+                    ),
+                    failure_evidence=note["evidence"] if note is not None else error,
+                )
+            )
+            continue
+
+        tools_data = payload.get("tools", [])
+        findings_data = payload.get("findings", [])
+        if not isinstance(tools_data, list) or not isinstance(findings_data, list):
+            raise ValueError(f"{path} contains invalid tools or findings")
+        tools: list[ToolInfo] = []
+        for tool in tools_data:
+            if not isinstance(tool, dict):
+                raise ValueError(f"{path} contains an invalid tool entry")
+            input_schema = tool.get("input_schema", {})
+            if not isinstance(input_schema, dict):
+                raise ValueError(f"{path} contains an invalid tool input schema")
+            tools.append(
+                ToolInfo(
+                    name=str(tool["name"]),
+                    description=str(tool.get("description", "")),
+                    input_schema=input_schema,
+                )
+            )
+        findings: list[Finding] = []
+        for finding in findings_data:
+            if not isinstance(finding, dict):
+                raise ValueError(f"{path} contains an invalid finding entry")
+            findings.append(
+                Finding(
+                    rule_id=str(finding["rule_id"]),
+                    severity=Severity[str(finding["severity"])],
+                    confidence=float(finding["confidence"]),
+                    tool_name=str(finding["tool_name"]),
+                    evidence=str(finding["evidence"]),
+                    fix=str(finding["fix"]),
+                )
+            )
+        result = ScanResult(
+            server_command=str(payload.get("server_command", "")),
+            tools=tools,
+            findings=findings,
+            score=score_findings(findings),
+        )
+        results.append(TargetResult(name=name, result=result))
+    return results
+
+
+def load_failure_notes(path: Path | None = None) -> dict[str, dict[str, str]]:
+    if path is None:
+        path = FAILURE_NOTES_PATH
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("docs/failure_notes.json must contain a JSON object")
+    notes: dict[str, dict[str, str]] = {}
+    for server, note in data.items():
+        if not isinstance(server, str) or not isinstance(note, dict):
+            raise ValueError("Each failure note must map a server name to an object")
+        category = note.get("category")
+        evidence = note.get("evidence")
+        if category not in FAILURE_CATEGORIES or not isinstance(evidence, str) or not evidence:
+            raise ValueError(f"Failure note for {server} requires a valid category and evidence")
+        notes[server] = {"category": category, "evidence": evidence}
+    return notes
 
 
 def load_targets(path: Path = TARGETS_PATH) -> list[dict[str, object]]:
@@ -240,6 +498,7 @@ def load_targets(path: Path = TARGETS_PATH) -> list[dict[str, object]]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Batch scan MCP audit targets")
     parser.add_argument("--i-understand", action="store_true")
+    parser.add_argument("--only", help="Comma-separated target names to scan")
     args = parser.parse_args(argv)
     if not args.i_understand:
         print(WARNING, file=sys.stderr)
@@ -247,6 +506,16 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     targets = load_targets()
+    if args.only is not None:
+        requested = [name.strip() for name in args.only.split(",")]
+        if not requested or any(not name for name in requested):
+            parser.error("--only requires a comma-separated list of target names")
+        target_names = {str(target["name"]) for target in targets}
+        unknown = sorted(set(requested) - target_names)
+        if unknown:
+            parser.error(f"--only contains unknown target names: {', '.join(unknown)}")
+        requested_names = set(requested)
+        targets = [target for target in targets if str(target["name"]) in requested_names]
     results = [scan_target(target) for target in targets]
     save_outputs(results)
     print(

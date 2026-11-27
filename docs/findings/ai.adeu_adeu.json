@@ -1,0 +1,501 @@
+{
+  "server_command": "npx -y @adeu/mcp-server@1.7.1",
+  "tools": [
+    {
+      "name": "read_docx",
+      "description": "Reads a DOCX file. Returns text with inline CriticMarkup for Tracked Changes and Comments: {++inserted++}, {--deleted--}, {==highlighted==}{>>comment<<}. Set clean_view=True for the finalized 'Accepted' text without markup.\n\nModes:\n- 'full' (default): paginated body content. Use page=N to navigate.\n- 'outline': heading map only \u2014 start here for large docs to plan targeted reads. Defaults to L1-L2 headings; pass outline_max_level=3-6 to see deeper structure.\n- 'appendix': defined terms, anchors, and cross-reference targets. Consult before editing legal/technical docs to avoid breaking references.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Absolute path to the DOCX file."
+          },
+          "clean_view": {
+            "type": "boolean",
+            "description": "If False (default), returns the 'Raw' text with inline CriticMarkup. If True, returns 'Accepted' text.",
+            "default": false
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "outline",
+              "appendix"
+            ],
+            "description": "'full' returns body content. 'outline' returns a structural heading map. 'appendix' returns defined terms.",
+            "default": "full"
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number (1-indexed) for mode='full'. Defaults to 1.",
+            "default": 1
+          },
+          "outline_max_level": {
+            "type": "number",
+            "description": "For mode='outline' only: cap on heading depth.",
+            "default": 2
+          },
+          "outline_verbose": {
+            "type": "boolean",
+            "description": "For mode='outline' only: includes metadata.",
+            "default": false
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "name": "process_document_batch",
+      "description": "Applies a batch of edits and review actions to a DOCX.\n\nAll changes evaluate against the ORIGINAL document state \u2014 do not chain dependent edits within one batch (e.g. rename X to Y, then modify Y). Apply the rename first, then send a second batch.\n\nEach item in `changes` must specify a `type`:\n1. 'modify': Search-and-replace. `target_text` must uniquely match \u2014 include surrounding context if the phrase is ambiguous. `new_text` supports Markdown: '# Heading 1' through '###### Heading 6', '**bold**', '_italic_', and '\\n\\n' to split into multiple paragraphs. Empty `new_text` deletes. Do NOT write CriticMarkup tags ({++, {--, {>>) manually \u2014 use the `comment` parameter for comments.\n2. 'accept' / 'reject': Finalize or revert a tracked change by `target_id` (e.g. 'Chg:12').\n3. 'reply': Reply to a comment by `target_id` (e.g. 'Com:5') with `text`.\n4. 'insert_row' / 'delete_row': Table edits. Disk mode only \u2014 not supported on Live Word canvas.\n\nID VOLATILITY: 'Chg:N' and 'Com:N' shift between document states. Always call `read_docx` immediately before any accept/reject/reply \u2014 do not reuse IDs from earlier in the conversation.\n\n`author_name` is used for attribution on all tracked changes and comments, in both disk and Live Word modes.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "original_docx_path": {
+            "type": "string",
+            "description": "Absolute path to the source file."
+          },
+          "author_name": {
+            "type": "string",
+            "description": "Name to appear in Track Changes (e.g., 'Reviewer AI')."
+          },
+          "changes": {
+            "type": "array",
+            "description": "List of changes to apply. Each change must specify 'type'.",
+            "items": {
+              "type": "object"
+            }
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Optional output path."
+          }
+        },
+        "required": [
+          "original_docx_path",
+          "author_name",
+          "changes"
+        ]
+      }
+    },
+    {
+      "name": "accept_all_changes",
+      "description": "Accepts all tracked changes and removes all comments in a single operation, producing a finalized clean document. Use this when a document review is entirely complete and you want to clear all redlines.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "docx_path": {
+            "type": "string",
+            "description": "Absolute path to the DOCX file."
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Optional output path."
+          }
+        },
+        "required": [
+          "docx_path"
+        ]
+      }
+    },
+    {
+      "name": "diff_docx_files",
+      "description": "Compares two DOCX files and returns a unified diff of their text content. Useful for analyzing differences between versions before editing.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "original_path": {
+            "type": "string",
+            "description": "Absolute path to the baseline DOCX file."
+          },
+          "modified_path": {
+            "type": "string",
+            "description": "Absolute path to the modified DOCX file."
+          },
+          "compare_clean": {
+            "type": "boolean",
+            "description": "If True, compares 'Accepted' state. If False, compares raw text.",
+            "default": true
+          }
+        },
+        "required": [
+          "original_path",
+          "modified_path"
+        ]
+      }
+    },
+    {
+      "name": "finalize_document",
+      "description": "Prepares a document for external distribution or e-signature. This tool combines metadata sanitization, document locking (protection), and markup resolution into a single step. NOTE: PDF export and AES encryption are disabled in this environment.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Absolute path to the DOCX file."
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Optional output path."
+          },
+          "sanitize_mode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "keep-markup"
+            ],
+            "description": "full removes all markup, keep-markup redacts metadata but keeps comments/redlines."
+          },
+          "accept_all": {
+            "type": "boolean",
+            "description": "If true, auto-accepts all unresolved track changes before finalizing."
+          },
+          "protection_mode": {
+            "type": "string",
+            "enum": [
+              "read_only",
+              "encrypt"
+            ],
+            "description": "Native OOXML document locking. encrypt falls back to read_only in this environment."
+          },
+          "password": {
+            "type": "string",
+            "description": "Ignored in this environment."
+          },
+          "author": {
+            "type": "string",
+            "description": "Replace all remaining markup authorship with this name."
+          },
+          "export_pdf": {
+            "type": "boolean",
+            "description": "Ignored in this environment."
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "name": "login_to_adeu_cloud",
+      "description": "Logs the user into the Adeu Cloud backend. Securely opens a browser window for authentication.",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "logout_of_adeu_cloud",
+      "description": "Logs out of the Adeu Cloud backend by clearing the local API key.",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "search_and_fetch_emails",
+      "description": "Searches the user's live email inbox. By default, searches only the Inbox folder. Returns a list of lightweight previews. Call again with `email_id` to fetch the full body and download attachments.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sender": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "has_attachments": {
+            "type": "boolean"
+          },
+          "attachment_name": {
+            "type": "string"
+          },
+          "is_unread": {
+            "type": "boolean"
+          },
+          "days_ago": {
+            "type": "number"
+          },
+          "folder": {
+            "type": "string",
+            "enum": [
+              "inbox",
+              "sent",
+              "all"
+            ]
+          },
+          "limit": {
+            "type": "number",
+            "default": 10
+          },
+          "offset": {
+            "type": "number",
+            "default": 0
+          },
+          "email_id": {
+            "type": "string"
+          },
+          "working_directory": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_email_draft",
+      "description": "Creates an email draft in the user's native draft box. Provide `reply_to_email_id` to reply, or `subject` and `to_recipients` for a new email.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "body_markdown": {
+            "type": "string"
+          },
+          "reply_to_email_id": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "to_recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attachment_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "body_markdown"
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "accept_all_changes",
+      "evidence": "tool name: accept_all_changes; parameter 'docx_path' schema: {\"description\": \"Absolute path to the DOCX file.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "accept_all_changes",
+      "evidence": "tool name: accept_all_changes; parameter 'output_path' schema: {\"description\": \"Optional output path.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "diff_docx_files",
+      "evidence": "tool name: diff_docx_files; parameter 'original_path' schema: {\"description\": \"Absolute path to the baseline DOCX file.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "diff_docx_files",
+      "evidence": "tool name: diff_docx_files; parameter 'modified_path' schema: {\"description\": \"Absolute path to the modified DOCX file.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "finalize_document",
+      "evidence": "tool name: finalize_document; parameter 'file_path' schema: {\"description\": \"Absolute path to the DOCX file.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "finalize_document",
+      "evidence": "tool name: finalize_document; parameter 'output_path' schema: {\"description\": \"Optional output path.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "process_document_batch",
+      "evidence": "tool name: process_document_batch; parameter 'original_docx_path' schema: {\"description\": \"Absolute path to the source file.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "process_document_batch",
+      "evidence": "tool name: process_document_batch; parameter 'output_path' schema: {\"description\": \"Optional output path.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "read_docx",
+      "evidence": "tool name: read_docx; parameter 'file_path' schema: {\"description\": \"Absolute path to the DOCX file.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "search_and_fetch_emails",
+      "evidence": "tool name: search_and_fetch_emails; parameter 'working_directory' schema: {\"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-005",
+      "severity": "LOW",
+      "confidence": 0.6,
+      "tool_name": "create_email_draft",
+      "evidence": "tool name: create_email_draft; matched substring: 'email'",
+      "fix": "Limit network destinations and require authorization for outbound requests."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "process_document_batch",
+      "evidence": "Word canvas.\\n\\nID VOLATILITY: 'Chg:N' and 'Com:N' shift between",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    },
+    {
+      "rule_id": "CAP-005",
+      "severity": "LOW",
+      "confidence": 0.6,
+      "tool_name": "search_and_fetch_emails",
+      "evidence": "tool name: search_and_fetch_emails; matched substring: 'fetch'",
+      "fix": "Limit network destinations and require authorization for outbound requests."
+    }
+  ],
+  "score": 24,
+  "explanations": [
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "accept_all_changes",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "accept_all_changes",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "diff_docx_files",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "diff_docx_files",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "finalize_document",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "finalize_document",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "process_document_batch",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "process_document_batch",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "read_docx",
+      "pattern_id": "MCP-KB-006",
+      "title": "Sensitive file access",
+      "why_it_matters": "Broad file access can expose credentials, private configuration, or user data to a tool caller.",
+      "remediation": "Restrict access to an explicit root and allowlisted files, and enforce permissions independently of caller input."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "search_and_fetch_emails",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-005",
+      "tool_name": "create_email_draft",
+      "pattern_id": "MCP-KB-018",
+      "title": "Unrestricted network access",
+      "why_it_matters": "Unrestricted outbound connectivity can enable data disclosure or access to unintended services.",
+      "remediation": "Restrict egress to required destinations and protocols, and validate destinations before connecting."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "process_document_batch",
+      "pattern_id": "MCP-KB-010",
+      "title": "Context stuffing with long descriptions",
+      "why_it_matters": "Excessive tool metadata can crowd out relevant context and make malicious or important content harder to review.",
+      "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
+    },
+    {
+      "rule_id": "CAP-005",
+      "tool_name": "search_and_fetch_emails",
+      "pattern_id": "MCP-KB-024",
+      "title": "Data disclosure through remote fetch",
+      "why_it_matters": "A tool that combines sensitive data with an uncontrolled network request can disclose information to third parties.",
+      "remediation": "Do not send secrets to caller-controlled destinations, minimize transmitted data, and enforce destination allowlists."
+    }
+  ],
+  "verdict": "REVIEW",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 3,
+    "MEDIUM": 10,
+    "HIGH": 0,
+    "CRITICAL": 0
+  }
+}

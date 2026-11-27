@@ -30,8 +30,12 @@ def test_high_finding_confidence_point_nine_scores_twenty_two() -> None:
     assert score_findings([finding(confidence=0.9)]) == 22
 
 
-def test_duplicate_rule_and_tool_is_counted_once() -> None:
-    assert score_findings([finding(), finding()]) == 25
+def test_additional_findings_for_same_rule_have_diminishing_weight() -> None:
+    assert score_findings([finding(), finding(tool_name="other")]) == 31
+
+
+def test_same_rule_score_is_capped_at_twice_its_weight() -> None:
+    assert score_findings([finding() for _ in range(10)]) == 50
 
 
 def test_score_is_capped_at_one_hundred() -> None:

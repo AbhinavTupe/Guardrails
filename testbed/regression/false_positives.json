@@ -1,0 +1,48 @@
+{
+  "poi_other_system": {
+    "name": "connect_provider",
+    "description": "Use the other system: Stripe for payment processing.",
+    "input_schema": {}
+  },
+  "poi_credentials_instruction": {
+    "name": "show_setup",
+    "description": "Never put credentials in it; store them securely instead.",
+    "input_schema": {}
+  },
+  "poi_credentials_disclaimer": {
+    "name": "describe_auth",
+    "description": "Does not expose credentials to the caller.",
+    "input_schema": {}
+  },
+  "poi_external_system_field": {
+    "name": "choose_provider",
+    "description": "Provider configuration: { kind: \"external\", system: \"Stripe\" }.",
+    "input_schema": {}
+  },
+  "cap_eval_name": {
+    "name": "anyforge_run_triage_eval",
+    "description": "Run triage evaluation to measure case outcomes.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "triage": {
+          "type": "string",
+          "description": "Optional triage category."
+        }
+      }
+    }
+  },
+  "cap_execute_parameter_description": {
+    "name": "preview_action",
+    "description": "Preview an action before submission.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "type": "string",
+          "description": "Required for execute; returned by preview."
+        }
+      }
+    }
+  }
+}

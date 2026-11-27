@@ -1,0 +1,280 @@
+{
+  "server_command": "npx -y mroffice-mcp@0.1.0",
+  "tools": [
+    {
+      "name": "create_document",
+      "description": "Create a new document or spreadsheet and open it in the MR Office editor for the person to see and edit. A document's content is Markdown (headings, lists, tables, emphasis); a spreadsheet's is CSV. `format` is the file it is exported as by default (docx or md for documents, csv for spreadsheets).",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The document's title"
+          },
+          "kind": {
+            "default": "document",
+            "type": "string",
+            "enum": [
+              "document",
+              "spreadsheet"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 2000000,
+            "description": "Markdown for a document, CSV for a spreadsheet"
+          },
+          "format": {
+            "description": "Default export format",
+            "type": "string",
+            "enum": [
+              "docx",
+              "md",
+              "csv"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "content"
+        ]
+      }
+    },
+    {
+      "name": "open_document",
+      "description": "Open a file in the MR Office editor for the person to see and edit: Word (.docx), Excel (.xlsx), PowerPoint (.pptx), PDF, Markdown, HTML, text, CSV. Give the file's bytes as base64 (`content_base64`), its text (`text`, for text formats), or an https `url` to fetch it from.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "The file name, with its extension (it says which editor opens it)"
+          },
+          "content_base64": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 5000000
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    {
+      "name": "update_document",
+      "description": "Replace the content of a document created or opened here with new Markdown (documents) or CSV (spreadsheets), as a new revision, and show it. Read it with get_document first: the person may have edited it.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The document's id"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 2000000
+          },
+          "expected_revision": {
+            "description": "The revision you read; the change is refused if the document moved on",
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "content"
+        ]
+      }
+    },
+    {
+      "name": "get_document",
+      "description": "Read a document's current content, including the person's edits in the editor: Markdown for documents, CSV per sheet for spreadsheets. Set include_file to also get the editor's file.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "include_file": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    {
+      "name": "render_page",
+      "description": "A picture (PNG) of one page of a document as the MR Office editor draws it, to check the layout of your work.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "page": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    {
+      "name": "export_document",
+      "description": "The document as a file: docx (Word), md, html or mrdoc for documents; xlsx (Excel), csv or mrsheet for spreadsheets; pptx (PowerPoint) or mrslides for presentations. Word, Excel and PowerPoint files are written by MR Office's engine and need the person signed in (sign_in). Returns the file and a download link for the person.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "docx",
+              "xlsx",
+              "pptx",
+              "md",
+              "html",
+              "mrdoc",
+              "csv",
+              "mrsheet",
+              "mrslides",
+              "pdf"
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    {
+      "name": "list_documents",
+      "description": "The documents created or opened with this server, newest first.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "sign_in",
+      "description": "Sign the person in to their MR Office account, which opening and saving Word, Excel and PowerPoint files needs. Opens MR Office's sign-in page in the person's browser and returns its link; the person signs in and allows it there, then the Office tools work. Says who is signed in when that is already done.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "sign_out",
+      "description": "Sign this app out of the person's MR Office account and revoke its access.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "widget_load",
+      "description": "The editor view reads the document it shows.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    {
+      "name": "widget_save",
+      "description": "The editor view saves what the person changed, as a new revision.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "base64": {
+            "type": "string"
+          },
+          "baseRev": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "base64"
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "CAP-004",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "open_document",
+      "evidence": "tool name: open_document; parameter 'url' schema: {\"format\": \"uri\", \"type\": \"string\"}",
+      "fix": "Validate URL inputs against an allowlist of permitted destinations."
+    }
+  ],
+  "score": 8,
+  "explanations": [
+    {
+      "rule_id": "CAP-004",
+      "tool_name": "open_document",
+      "pattern_id": "MCP-KB-019",
+      "title": "Unrestricted URL parameter",
+      "why_it_matters": "A caller-controlled URL can expose the server to untrusted content and unintended network destinations.",
+      "remediation": "Prefer fixed destinations or strict allowlists and validate URL scheme, host, and resolved address."
+    }
+  ],
+  "verdict": "PASS",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 0,
+    "MEDIUM": 1,
+    "HIGH": 0,
+    "CRITICAL": 0
+  }
+}

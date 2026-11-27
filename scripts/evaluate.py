@@ -7,14 +7,16 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from mcp_audit.cli import run_scan
-from mcp_audit.models import Finding, ScanResult, Severity
-from mcp_audit.rules import get_rule_category
+from mcp_audit.models import Finding, ScanResult, Severity, ToolInfo
+from mcp_audit.rules import get_rule_category, load_all_rules, run_rules
 
 ROOT = Path(__file__).resolve().parents[1]
 TESTBED_DIR = ROOT / "testbed"
 EXPECTED_PATH = TESTBED_DIR / "expected.json"
 ADVERSARIAL_EXPECTED_PATH = TESTBED_DIR / "expected_adversarial.json"
 UNSEEN_EXPECTED_PATH = TESTBED_DIR / "expected_unseen.json"
+REGRESSION_CASES_PATH = TESTBED_DIR / "regression" / "false_positives.json"
+REGRESSION_EXPECTED_PATH = TESTBED_DIR / "expected_regression.json"
 REPORT_PATH = ROOT / "docs" / "evaluation.md"
 MINIMUM_SEVERITY = Severity.MEDIUM
 REPORTED_CATEGORIES = {
@@ -23,15 +25,6 @@ REPORTED_CATEGORIES = {
     "shell_exec",
     "unrestricted_path",
 }
-V0_ADVERSARIAL_TABLE = [
-    "| Category | TP | FP | FN | Precision | Recall |",
-    "|---|---:|---:|---:|---:|---:|",
-    "| file_write_delete | 0 | 1 | 0 | 0.000 | 0.000 |",
-    "| poisoned_description | 1 | 0 | 3 | 1.000 | 0.250 |",
-    "| shell_exec | 0 | 0 | 1 | 0.000 | 0.000 |",
-    "| unrestricted_path | 0 | 0 | 1 | 0.000 | 0.000 |",
-    "| **Overall** | **1** | **1** | **5** | **0.500** | **0.167** |",
-]
 
 
 @dataclass(frozen=True)
@@ -195,6 +188,9 @@ def build_evaluation_markdown(
     adversarial_metrics: dict[str, CategoryMetrics] | None = None,
     unseen_metrics: dict[str, CategoryMetrics] | None = None,
     unseen_evaluations: dict[str, ServerEvaluation] | None = None,
+    regression_metrics: dict[str, CategoryMetrics] | None = None,
+    regression_evaluations: dict[str, set[str]] | None = None,
+    adversarial_evaluations: dict[str, ServerEvaluation] | None = None,
 ) -> str:
     def table(title: str, category_metrics: dict[str, CategoryMetrics]) -> list[str]:
         lines = [
@@ -205,63 +201,132 @@ def build_evaluation_markdown(
         ]
         for category in sorted(category_metrics):
             item = category_metrics[category]
+            if item.tp == 0 and item.fp == 0 and item.fn == 0:
+                precision = recall = "n/a"
+            else:
+                precision = f"{item.precision:.3f}"
+                recall = f"{item.recall:.3f}"
             lines.append(
                 f"| {category} | {item.tp} | {item.fp} | {item.fn} | "
-                f"{item.precision:.3f} | {item.recall:.3f} |"
+                f"{precision} | {recall} |"
             )
         overall = overall_metrics(category_metrics)
+        if overall.tp == 0 and overall.fp == 0 and overall.fn == 0:
+            overall_precision = overall_recall = "n/a"
+        else:
+            overall_precision = f"{overall.precision:.3f}"
+            overall_recall = f"{overall.recall:.3f}"
         lines.extend(
             [
                 (
                     f"| **Overall** | **{overall.tp}** | **{overall.fp}** | "
-                    f"**{overall.fn}** | **{overall.precision:.3f}** | "
-                    f"**{overall.recall:.3f}** |"
+                    f"**{overall.fn}** | **{overall_precision}** | "
+                    f"**{overall_recall}** |"
                 ),
                 "",
             ]
         )
         return lines
 
-    lines = ["# Testbed Evaluation", ""]
-    lines.extend(table("Core Testbed", metrics))
-    if adversarial_metrics is not None:
-        lines.extend(
-            [
-                "## Adversarial Testbed — v0 (before fixes)",
-                "",
-                *V0_ADVERSARIAL_TABLE,
-                "",
-            ]
-        )
-        lines.extend(table("Adversarial Testbed — v1 (old cases)", adversarial_metrics))
-    if unseen_metrics is not None:
-        lines.extend(table("New Unseen Adversarial Testbed — v1", unseen_metrics))
-    if unseen_evaluations is not None:
-        unseen_expected = json.loads(UNSEEN_EXPECTED_PATH.read_text(encoding="utf-8"))
-        lines.extend(
-            [
-                "### New unseen case outcomes",
-                "",
-                "| Server | Ground truth | Detected | Result |",
-                "|---|---|---|---|",
-            ]
-        )
-        for server, evaluation in sorted(unseen_evaluations.items()):
-            expected = set(unseen_expected[server]["categories"])
-            actual = evaluation.static_categories | evaluation.probe_categories
+    def outcomes_table(
+        title: str,
+        expected: dict[str, object],
+        actual: dict[str, set[str]],
+    ) -> list[str]:
+        lines = [
+            f"#### {title}",
+            "",
+            "| Case | Ground truth | Detected | Result |",
+            "|---|---|---|---|",
+        ]
+        for case in sorted(set(expected) | set(actual)):
+            value = expected.get(case)
+            if isinstance(value, dict):
+                ground_truth = set(value.get("categories", []))
+            elif isinstance(value, list):
+                ground_truth = set(value)
+            else:
+                ground_truth = set()
+            detected = actual.get(case, set())
             lines.append(
-                f"| `{server}` | {', '.join(sorted(expected)) or 'none'} | "
-                f"{', '.join(sorted(actual)) or 'none'} | "
-                f"{'PASS' if expected == actual else 'MISMATCH'} |"
+                f"| `{case}` | {', '.join(sorted(ground_truth)) or 'none'} | "
+                f"{', '.join(sorted(detected)) or 'none'} | "
+                f"{'PASS' if ground_truth == detected else 'MISMATCH'} |"
             )
         lines.append("")
+        return lines
+
+    lines = ["# Testbed Evaluation", ""]
+    lines.extend(table("Core", metrics))
+    lines.extend(
+        [
+            "## Adversarial v0 (before fixes)",
+            "",
+            "Static snapshot (0.500 / 0.167).",
+            "",
+            "## Adversarial v1 snapshot",
+            "",
+            "Static snapshot (1.000 / 0.833).",
+            "Reworded set: 2/2.",
+            "",
+            "## Current rules (v2)",
+            "",
+        ]
+    )
+    if adversarial_metrics is not None:
+        lines.extend(table("Old adversarial set", adversarial_metrics))
+        adversarial_expected = json.loads(ADVERSARIAL_EXPECTED_PATH.read_text(encoding="utf-8"))
+        adversarial_actual = (
+            {
+                server: evaluation.static_categories | evaluation.probe_categories
+                for server, evaluation in (adversarial_evaluations or {}).items()
+            }
+            if adversarial_evaluations is not None
+            else {}
+        )
+        lines.extend(
+            outcomes_table(
+                "Old adversarial set per-case outcomes",
+                adversarial_expected,
+                adversarial_actual,
+            )
+        )
+    if unseen_metrics is not None:
+        lines.extend(table("Reworded set", unseen_metrics))
+        unseen_expected = json.loads(UNSEEN_EXPECTED_PATH.read_text(encoding="utf-8"))
+        unseen_actual = (
+            {
+                server: evaluation.static_categories | evaluation.probe_categories
+                for server, evaluation in (unseen_evaluations or {}).items()
+            }
+            if unseen_evaluations is not None
+            else {}
+        )
+        lines.extend(
+            outcomes_table(
+                "Reworded set per-case outcomes",
+                unseen_expected,
+                unseen_actual,
+            )
+        )
+    if regression_metrics is not None:
+        lines.extend(table("Regression set", regression_metrics))
+        regression_expected = json.loads(REGRESSION_EXPECTED_PATH.read_text(encoding="utf-8"))
+        lines.extend(
+            outcomes_table(
+                "Regression set per-case outcomes",
+                regression_expected,
+                regression_evaluations or {},
+            )
+        )
     lines.extend(
         [
             "## Version note",
             "",
-            "The v1 fixes were made after seeing the v0 adversarial cases; v0 is "
-            "retained as the pre-fix baseline. Unseen-case ground truth was recorded "
-            "before the new servers were evaluated.",
+            "The v1 fixes were made after seeing the v0 adversarial cases. "
+            "The v2 rules (POI-004, CAP-001) were tightened after seeing public-scan "
+            "false positives. The regression cases are NOT held-out. Reworded-set "
+            "ground truth was written before evaluation.",
             "",
             "## Severity Threshold",
             "",
@@ -270,7 +335,8 @@ def build_evaluation_markdown(
             "## Method",
             "",
             "For each file in `testbed/expected.json`, "
-            "`testbed/expected_adversarial.json`, and `testbed/expected_unseen.json`, "
+            "`testbed/expected_adversarial.json`, `testbed/expected_unseen.json`, "
+            "and `testbed/expected_regression.json`, "
             "mcp-audit launches each server and applies the same static rule path "
             "used by the CLI, then runs the CLI probe path with `--probe`. Finding "
             "rule IDs are mapped to the existing categories, plus category presence "
@@ -322,9 +388,49 @@ def evaluate_testbed(
     return metrics, evaluations
 
 
+def evaluate_regression() -> tuple[
+    dict[str, CategoryMetrics],
+    dict[str, set[str]],
+]:
+    cases = json.loads(REGRESSION_CASES_PATH.read_text(encoding="utf-8"))
+    expected_data = json.loads(REGRESSION_EXPECTED_PATH.read_text(encoding="utf-8"))
+    if not isinstance(cases, dict) or not isinstance(expected_data, dict):
+        raise ValueError(
+            "testbed/regression/false_positives.json and "
+            "testbed/expected_regression.json must contain objects"
+        )
+
+    load_all_rules()
+    expected_by_case: dict[str, set[str]] = {}
+    actual_by_case: dict[str, set[str]] = {}
+    for case_name, case in cases.items():
+        if not isinstance(case_name, str) or not isinstance(case, dict):
+            continue
+        input_schema = case.get("input_schema", {})
+        if not isinstance(input_schema, dict):
+            continue
+        tool = ToolInfo(
+            name=str(case["name"]),
+            description=str(case.get("description", "")),
+            input_schema=input_schema,
+        )
+        findings = run_rules([tool])
+        expected_by_case[case_name] = set(expected_data.get(case_name, []))
+        actual_by_case[case_name] = {
+            get_rule_category(finding.rule_id)
+            for finding in findings
+        }
+
+    return (
+        calculate_category_metrics(expected_by_case, actual_by_case),
+        actual_by_case,
+    )
+
+
 def main() -> int:
     metrics, core_evaluations = evaluate_testbed()
     adversarial_metrics, adversarial_evaluations = evaluate_testbed(ADVERSARIAL_EXPECTED_PATH)
+    regression_metrics, regression_evaluations = evaluate_regression()
     known_misses = build_known_misses(EXPECTED_PATH, core_evaluations)
     known_misses.extend(
         build_known_misses(
@@ -339,6 +445,9 @@ def main() -> int:
         adversarial_metrics,
         unseen_metrics,
         unseen_evaluations,
+        regression_metrics,
+        regression_evaluations,
+        adversarial_evaluations,
     )
     markdown = markdown.replace(
         "No known misses or false alarms.",

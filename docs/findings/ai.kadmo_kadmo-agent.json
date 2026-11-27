@@ -1,0 +1,5 @@
+{
+  "name": "ai.kadmo/kadmo-agent",
+  "error": "MCP server operation timed out after 120.0 seconds",
+  "failure_reason": "timeout"
+}
