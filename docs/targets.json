@@ -56,7 +56,7 @@
   },
   {
     "name": "ai.ankimcp/anki-mcp-server",
-    "command": "npx -y @ankimcp/anki-mcp-server@0.27.0",
+    "command": "npx -y @ankimcp/anki-mcp-server@0.27.0 --stdio",
     "source_url": "https://github.com/ankimcp/anki-mcp-server",
     "version": "0.27.0",
     "fetched_at": "2026-11-26T05:47:02Z",
@@ -199,7 +199,7 @@
   },
   {
     "name": "ai.kadmo/kadmo-agent",
-    "command": "npx -y @kadmo/cli@0.5.1",
+    "command": "npx -y @kadmo/cli@0.5.1 mcp",
     "source_url": "https://kadmo.ai",
     "version": "0.5.1",
     "fetched_at": "2026-11-26T05:47:02Z",
@@ -254,7 +254,7 @@
   },
   {
     "name": "ai.huddo/huddo",
-    "command": "npx -y huddoai@0.10.2",
+    "command": "npx -y huddoai@0.10.2 mcp",
     "source_url": "https://github.com/puffo-ai/huddo-mcp",
     "version": "0.10.2",
     "fetched_at": "2026-11-26T05:47:02Z",
@@ -307,6 +307,41 @@
     "command": "uvx mcp-server-time==2026.11.18",
     "source_url": "https://github.com/modelcontextprotocol/servers",
     "version": "2026.11.18",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "server-everything",
+    "command": "npx -y @modelcontextprotocol/server-everything@2.4.0",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "version": "2.4.0",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "server-sequential-thinking",
+    "command": "npx -y @modelcontextprotocol/server-sequential-thinking@2.2.0",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "version": "2.2.0",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "context7",
+    "command": "npx -y @upstash/context7-mcp@4.9.1",
+    "source_url": "https://github.com/upstash/context7",
+    "version": "4.9.1",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "desktop-commander",
+    "command": "npx -y @wonderwhy-er/desktop-commander@0.3.4",
+    "source_url": "https://github.com/wonderwhy-er/DesktopCommanderMCP",
+    "version": "0.3.4",
+    "install_note": "Installed on first launch by the pinned command."
+  },
+  {
+    "name": "playwright",
+    "command": "npx -y @playwright/mcp@0.0.86",
+    "source_url": "https://github.com/microsoft/playwright-mcp",
+    "version": "0.0.86",
     "install_note": "Installed on first launch by the pinned command."
   }
 ]
