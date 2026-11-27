@@ -462,14 +462,6 @@
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
-      "tool_name": "move_file",
-      "evidence": "tool name: move_file; parameter 'destination' schema: {\"description\": \"Its new path, including the name; nothing may exist there yet. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
       "tool_name": "read_file",
       "evidence": "tool name: read_file; parameter 'path' schema: {\"description\": \"The file to read as text. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
@@ -499,14 +491,6 @@
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     },
     {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "search_files",
-      "evidence": "tool name: search_files; parameter 'pattern' schema: {\"description\": \"Glob matched against each entry's path relative to path, never its content: '*.ts' matches directly under path, '**/*.ts' at any depth.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
       "rule_id": "CAP-002",
       "severity": "MEDIUM",
       "confidence": 0.8,
@@ -520,14 +504,6 @@
       "confidence": 0.8,
       "tool_name": "write_file",
       "evidence": "tool name: write_file; parameter 'path' schema: {\"description\": \"The file to create, or to overwrite if it exists; its parent directory must exist. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "write_file",
-      "evidence": "tool name: write_file; parameter 'content' schema: {\"description\": \"The complete text the file will contain, replacing any it had\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     }
   ],
@@ -615,14 +591,6 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "move_file",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "read_file",
       "pattern_id": "MCP-KB-006",
       "title": "Sensitive file access",
@@ -654,14 +622,6 @@
       "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
     },
     {
-      "rule_id": "CAP-003",
-      "tool_name": "search_files",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
       "rule_id": "CAP-002",
       "tool_name": "write_file",
       "pattern_id": "MCP-KB-008",
@@ -676,21 +636,13 @@
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
       "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "write_file",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
     }
   ],
   "verdict": "REVIEW",
   "severity_counts": {
     "INFO": 0,
     "LOW": 0,
-    "MEDIUM": 19,
+    "MEDIUM": 16,
     "HIGH": 0,
     "CRITICAL": 0
   },

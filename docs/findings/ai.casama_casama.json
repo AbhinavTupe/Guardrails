@@ -573,14 +573,6 @@
       "fix": "Validate URL inputs against an allowlist of permitted destinations."
     },
     {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "preview_pack",
-      "evidence": "tool name: preview_pack; parameter 'gallery_id' schema: {\"description\": \"A pack from the plugin directory\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
       "rule_id": "CAP-004",
       "severity": "MEDIUM",
       "confidence": 0.8,
@@ -597,7 +589,7 @@
       "fix": "Remove the URL or verify that it is an expected destination before using the tool."
     }
   ],
-  "score": 23,
+  "score": 21,
   "explanations": [
     {
       "rule_id": "CAP-003",
@@ -614,14 +606,6 @@
       "title": "Unrestricted URL parameter",
       "why_it_matters": "A caller-controlled URL can expose the server to untrusted content and unintended network destinations.",
       "remediation": "Prefer fixed destinations or strict allowlists and validate URL scheme, host, and resolved address."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "preview_pack",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
     },
     {
       "rule_id": "CAP-004",
@@ -644,7 +628,7 @@
   "severity_counts": {
     "INFO": 0,
     "LOW": 1,
-    "MEDIUM": 4,
+    "MEDIUM": 3,
     "HIGH": 0,
     "CRITICAL": 0
   }

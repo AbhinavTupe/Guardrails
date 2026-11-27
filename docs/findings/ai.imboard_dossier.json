@@ -206,28 +206,12 @@
       "rule_id": "CAP-003",
       "severity": "MEDIUM",
       "confidence": 0.8,
-      "tool_name": "resolve_graph",
-      "evidence": "tool name: resolve_graph; parameter 'dossier' schema: {\"description\": \"Path to dossier file (.ds.md) or registry name\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
       "tool_name": "verify_dossier",
       "evidence": "tool name: verify_dossier; parameter 'path' schema: {\"description\": \"Path to dossier file (.ds.md)\", \"type\": \"string\"}",
       "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
-    },
-    {
-      "rule_id": "CAP-003",
-      "severity": "MEDIUM",
-      "confidence": 0.8,
-      "tool_name": "verify_graph",
-      "evidence": "tool name: verify_graph; parameter 'dossier' schema: {\"description\": \"Path to dossier file (.ds.md) or registry name. Resolves and verifies in one shot.\", \"type\": \"string\"}",
-      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
     }
   ],
-  "score": 16,
+  "score": 12,
   "explanations": [
     {
       "rule_id": "CAP-003",
@@ -247,23 +231,7 @@
     },
     {
       "rule_id": "CAP-003",
-      "tool_name": "resolve_graph",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
       "tool_name": "verify_dossier",
-      "pattern_id": "MCP-KB-007",
-      "title": "Path traversal",
-      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
-      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
-    },
-    {
-      "rule_id": "CAP-003",
-      "tool_name": "verify_graph",
       "pattern_id": "MCP-KB-007",
       "title": "Path traversal",
       "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
@@ -274,7 +242,7 @@
   "severity_counts": {
     "INFO": 0,
     "LOW": 0,
-    "MEDIUM": 5,
+    "MEDIUM": 3,
     "HIGH": 0,
     "CRITICAL": 0
   }

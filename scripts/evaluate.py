@@ -323,10 +323,8 @@ def build_evaluation_markdown(
         [
             "## Version note",
             "",
-            "The v1 fixes were made after seeing the v0 adversarial cases. "
-            "The v2 rules (POI-004, CAP-001) were tightened after seeing public-scan "
-            "false positives. The regression cases are NOT held-out. Reworded-set "
-            "ground truth was written before evaluation.",
+            "v3: CAP-003 tightened after MEDIUM triage; regression cases are not held-out.",
+            "Reworded-set ground truth was written before evaluation.",
             "",
             "## Severity Threshold",
             "",

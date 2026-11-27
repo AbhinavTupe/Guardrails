@@ -44,5 +44,149 @@
         }
       }
     }
+  },
+  "cap_003_targetDate": {
+    "name": "schedule",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "targetDate": {
+          "type": "string",
+          "description": "Filesystem path associated with the target date."
+        }
+      }
+    }
+  },
+  "cap_003_dueDate": {
+    "name": "schedule",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "dueDate": {
+          "type": "string",
+          "description": "Filesystem path associated with the due date."
+        }
+      }
+    }
+  },
+  "cap_003_originalCreatedAt": {
+    "name": "record",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "originalCreatedAt": {
+          "type": "string",
+          "description": "Filesystem path associated with the original creation time."
+        }
+      }
+    }
+  },
+  "cap_003_parentId": {
+    "name": "record",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Filesystem path associated with the parent identifier."
+        }
+      }
+    }
+  },
+  "cap_003_fileId": {
+    "name": "record",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "fileId": {
+          "type": "string",
+          "description": "Filesystem path associated with the file identifier."
+        }
+      }
+    }
+  },
+  "cap_003_snapshotId": {
+    "name": "snapshot",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "snapshotId": {
+          "type": "string",
+          "description": "Filesystem path associated with the snapshot identifier."
+        }
+      }
+    }
+  },
+  "cap_003_codebaseId": {
+    "name": "codebase",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "codebaseId": {
+          "type": "string",
+          "description": "Filesystem path associated with the codebase identifier."
+        }
+      }
+    }
+  },
+  "cap_003_idempotencyKey": {
+    "name": "update_item",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "idempotencyKey": {
+          "type": "string",
+          "description": "Filesystem path associated with the idempotency key."
+        }
+      }
+    }
+  },
+  "cap_003_question": {
+    "name": "ask",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "Filesystem path associated with the question."
+        }
+      }
+    }
+  },
+  "cap_003_repo": {
+    "name": "repository",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "repo": {
+          "type": "string",
+          "description": "Filesystem path associated with the repository."
+        }
+      }
+    }
+  },
+  "cap_003_name": {
+    "name": "item",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Filesystem path associated with the item name."
+        }
+      }
+    }
+  },
+  "cap_003_content": {
+    "name": "item",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Filesystem path associated with the item content."
+        }
+      }
+    }
   }
 }

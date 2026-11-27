@@ -10,6 +10,8 @@ mcp-audit scan "python testbed/vuln_shell.py"
 mcp-audit scan --html report.html "python testbed/vuln_shell.py"
 ```
 
+![Example report on the bundled test server](docs/report-screenshot.png)
+
 Open `report.html` to view the HTML report.
 
 ## 2. What it checks
@@ -41,6 +43,8 @@ The first finding for a rule contributes its full confidence-adjusted severity w
 
 A manual review checked 18 HIGH findings. It found 0 true positives and 18 false positives; the rules were tightened afterwards. The result is 0 HIGH+ findings on the 14 enumerated servers. These reports describe findings that were **flagged by heuristic**, not confirmed exploitation or security properties.
 
+MEDIUM findings were triaged by rule in docs/medium_triage.md; the remaining CAP-003 hits are path-like parameters with no pattern, enum or maximum length. They are capability signals, not confirmed vulnerabilities.
+
 ## 5. Evaluation
 
 [docs/evaluation.md](docs/evaluation.md) reports:
@@ -53,6 +57,8 @@ A manual review checked 18 HIGH findings. It found 0 true positives and 18 false
 
 v1 fixes were made after seeing v0 failures, and v2 rules were tightened after the public scan, so these are not held-out results.
 
+v3: CAP-003 tightened after MEDIUM triage (108 -> 75 saved findings); regression cases are not held-out.
+
 Known miss: `adversarial/paraphrased_override.py` requires an LLM for reliable paraphrase detection.
 
 ## 6. Limitations
@@ -60,7 +66,7 @@ Known miss: `adversarial/paraphrased_override.py` requires an LLM for reliable p
 - Results come from heuristics, not proof of exploitability.
 - Only 14 of 30 public targets were enumerated.
 - 25 of 30 targets came from the `ai.*` registry namespace, which introduces selection bias.
-- MEDIUM findings have not been manually triaged.
+- MEDIUM findings were reviewed by rule, not one by one.
 - The filesystem server enforces its allowlist server-side, so CAP-003 hits are expected.
 
 ## 7. Responsible use

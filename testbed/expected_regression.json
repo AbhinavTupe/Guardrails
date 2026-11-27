@@ -4,5 +4,17 @@
   "poi_credentials_disclaimer": [],
   "poi_external_system_field": [],
   "cap_eval_name": [],
-  "cap_execute_parameter_description": []
+  "cap_execute_parameter_description": [],
+  "cap_003_targetDate": [],
+  "cap_003_dueDate": [],
+  "cap_003_originalCreatedAt": [],
+  "cap_003_parentId": [],
+  "cap_003_fileId": [],
+  "cap_003_snapshotId": [],
+  "cap_003_codebaseId": [],
+  "cap_003_idempotencyKey": [],
+  "cap_003_question": [],
+  "cap_003_repo": [],
+  "cap_003_name": [],
+  "cap_003_content": []
 }
