@@ -1,0 +1,4 @@
+{
+  "name": "ai.haymon/dbmcp",
+  "error": "MCP server launch or protocol error: unhandled errors in a TaskGroup (1 sub-exception)"
+}

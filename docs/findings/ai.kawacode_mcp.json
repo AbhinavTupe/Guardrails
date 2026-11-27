@@ -1,0 +1,1636 @@
+{
+  "server_command": "npx -y @kawacode/mcp@10.6.0",
+  "tools": [
+    {
+      "name": "get_relevant_context",
+      "description": "Find past intents and decisions relevant to the current user request.\n\nWhen to use:\n- After you have done a quick initial exploration of the user's request and know which files are involved. Calling earlier with only a vague prompt gives weak results.\n- To pull task-specific context instead of dumping all recent activity \u2014 preferred for large projects.\n\nInputs of note:\n- `prompt`: the user request, in their words or your paraphrase.\n- `activeFiles` (recommended): files you have identified as relevant to the request. Significantly improves relevance.\n- `maxIntents`, `maxDecisions`, `minRelevance`: result-shaping caps and threshold.\n\nReturns:\n- `relevantIntents`: past work units (intents) related to the task, scored by relevance.\n- `relevantDecisions`: prior decisions related to the task \u2014 both intent-scoped and repo-scoped. Summary-only (no inline rationale, to keep context lean); call `get_decision_detail(decisionId)` for the full rationale/context/consequences of any decision you want to open.\n\nRecommended sequence:\n1. `check_active_intent` at session start to resume any existing work.\n2. Briefly explore the user's request to identify involved files.\n3. `get_relevant_context` with the prompt and `activeFiles` to inform the approach.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The user request to find relevant context for"
+          },
+          "activeFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files currently being discussed or recently opened"
+          },
+          "maxIntents": {
+            "type": "number",
+            "description": "Maximum number of intents to return"
+          },
+          "maxDecisions": {
+            "type": "number",
+            "description": "Maximum number of decisions to return"
+          },
+          "minRelevance": {
+            "type": "number",
+            "description": "Minimum relevance score (0-1)"
+          }
+        },
+        "required": [
+          "repoPath",
+          "prompt"
+        ]
+      }
+    },
+    {
+      "name": "check_active_intent",
+      "description": "REQUIRED before writing any code. Returns this session's current intent; if there is none, confirm the details with the user and call create_and_activate_intent.\n\nIntents are active PER SESSION \u2014 many can be active on one repo at once. hasActiveIntent reflects only YOUR session, while activeIntents lists every session's current intent (yours and teammates') and may be non-empty when you have none. A stale intent stays \"active\"; terminal states are committed / pushed / done / abandoned / superseded.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          }
+        },
+        "required": [
+          "repoPath"
+        ]
+      }
+    },
+    {
+      "name": "create_and_activate_intent",
+      "description": "Create a new intent from the user's request and mark it as active for THIS session.\n\nCall this when check_active_intent returns no active intent for your session. Before calling:\n1. Summarize what the user is asking for\n2. Ask the user to confirm the intent details (title, description, type)\n3. Then call this tool with the confirmed details\n\nThis ensures all AI-generated code gets properly tracked and attributed.\n\nMulti-active model: many intents can be active on a repo at once (one per\nsession/teammate). Creating + activating one only sets YOUR session's current\nfocus \u2014 it never blocks or displaces another session's active intent.\n\nIf the new intent overlaps existing work, YOU do not decide what happens: Kawa\nCode parks the request, asks the user, and this tool reports the outcome in\n\"action\". An overlap parks a decision for the user \u2014 it is not an instruction to\nstop working. Act on \"action\":\n- \"created\" / \"reactivated\": done; the intent is active. Proceed.\n- \"pending_approval\": the user has been asked in Kawa Code; the intent does not\n  exist yet. Tell them it is waiting, keep working on anything that does not\n  depend on this intent, and call this tool again with the returned pendingId\n  (same title, description and repoPath) at your next checkpoint or once they\n  say they have answered. Each call waits up to ~20 seconds for the answer.\n- \"awaiting_user\": this tool will stop asking. Do not sit idle \u2014 a parked request\n  expires after 24 hours and is dropped when the session ends, so the answer you\n  would be waiting for may never come. Tell the user, continue independent work,\n  and call once more with the pendingId after they say they have answered.\n- \"declined\": the user said no to this intent. Do not retry it under another\n  title. Edits already on disk are not reverted \u2014 tell the user and ask what\n  they want done with them.\n- \"expired\" / \"unknown_pending\": nothing was decided; call again without pendingId\n  if the work is still wanted.\nWork done while a request is parked is still real work, but it is not attributed\nto the intent: decisions recorded before the intent exists carry no intent id,\nand complete_intent has nothing to complete until it does. So continue, but reach\nthe decision before you commit. There is no force option \u2014 only the user can\ndecide an overlap.\n\nIf this tool call itself times out (before any pendingId was returned), call it\nonce more with the same arguments \u2014 it will not create a duplicate request.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "title": {
+            "type": "string",
+            "description": "Short, descriptive title for the intent"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this intent accomplishes"
+          },
+          "templateType": {
+            "type": "string",
+            "enum": [
+              "feature",
+              "refactor",
+              "exploration"
+            ],
+            "description": "Type of work"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Requirements or constraints for this work"
+          },
+          "pendingId": {
+            "type": "string",
+            "description": "Only after a pending_approval response: the pendingId it returned. Asks whether the user has decided. Pass the same title, description and repoPath as before."
+          }
+        },
+        "required": [
+          "repoPath",
+          "title",
+          "description"
+        ]
+      }
+    },
+    {
+      "name": "activate_intent",
+      "description": "Activate an existing intent by ID \u2014 sets it as THIS session's current focus.\n\nUse this to:\n- Switch your current focus to a different intent found via list_team_intents or get_relevant_context\n- Re-activate an intent that was deactivated (e.g., to complete it)\n- Resume work on a previously created intent\n- Resume an \"abandoned\" intent (see below)\n\nAccepts both cloud IDs (from get_relevant_context / API) and local UUIDs (from list_team_intents).\n\nMulti-active model: activating an intent only moves YOUR session's current\npointer. Many intents can be active on a repo at once (one current per\nsession/teammate), so this never blocks on or displaces another session's\nactive intent \u2014 there is no lock to take over.\n\nResuming abandoned intents:\n- Abandoned intents have their decisions soft-deleted (invisible to recall and\n  get_relevant_context). Activating one transparently restores them \u2014 single-intent\n  decisions for this intent get their soft-delete cleared so the prior reasoning\n  becomes visible again. Multi-intent decisions stay visible throughout (they were\n  never soft-deleted).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "The cloud ID (preferred) or local UUID of the existing intent to activate."
+          }
+        },
+        "required": [
+          "repoPath",
+          "intentId"
+        ]
+      }
+    },
+    {
+      "name": "resume_intent",
+      "description": "Resume an existing intent by ID in one call \u2014 activate it AND load its recorded decisions.\n\nUse this to pick up a handoff. When a prompt says \"follow up on intent <id>\" (or you otherwise want to continue a specific existing intent), call resume_intent(<id>) instead of creating a new one. It:\n- activates the intent as THIS session's current focus (multi-active \u2014 never displaces a teammate's active intent), and\n- returns the intent's title/description/status plus its recorded decisions (summary-only; call get_decision_detail(id) for full rationale on any one).\n\nThis is the fast path for cross-developer handoff without a session or transcript export: the reasoning lives in Kawa Code, so a teammate resumes the thread from just the intent id. For the code itself, the intent's owner should have committed or pushed first (a prompt carries reasoning, not an uncommitted working tree).\n\nReturns { resumed, intentId, intent?, decisions[], count, message }. resumed=false with a message when the id can't be activated.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "The cloud ID (preferred) or local UUID of the intent to resume \u2014 e.g. the id from a \"follow up on intent <id>\" handoff."
+          }
+        },
+        "required": [
+          "repoPath",
+          "intentId"
+        ]
+      }
+    },
+    {
+      "name": "get_intents_for_file",
+      "description": "Intents with code blocks in a file, so you can see in-progress work and team conflicts before editing.\n\nPass startLine + endLine to narrow to a range; the result then reports the exact overlap and warns when it hits a teammate's active intent.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Path to the file (relative to repo root)"
+          },
+          "startLine": {
+            "type": "number",
+            "description": "Start line (1-based). Provide with endLine to narrow to a range."
+          },
+          "endLine": {
+            "type": "number",
+            "description": "End line (1-based, inclusive). Provide with startLine to narrow to a range."
+          }
+        },
+        "required": [
+          "repoPath",
+          "filePath"
+        ]
+      }
+    },
+    {
+      "name": "list_team_intents",
+      "description": "List intents from team members for this repository.\n\nUse this to:\n- See what your team is working on\n- Check for potential overlapping work before starting a new task\n- Review the status of various features/refactors in progress\n\nFiltering (status, author, date range) and pagination are applied server-side across the full result set (default: 50 per page; use limit/offset to page). `count` is the total number of matching intents, not just the returned page.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "committed",
+              "pushed",
+              "done",
+              "abandoned"
+            ],
+            "description": "Filter by intent status."
+          },
+          "author": {
+            "type": "string",
+            "description": "Filter by author name or ID"
+          },
+          "since": {
+            "type": "string",
+            "description": "Filter intents updated after this ISO8601 date (e.g. \"2026-04-01\")"
+          },
+          "until": {
+            "type": "string",
+            "description": "Filter intents updated before this ISO8601 date"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of intents to return (default: 50)"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Number of intents to skip for pagination (default: 0)"
+          }
+        },
+        "required": [
+          "repoPath"
+        ]
+      }
+    },
+    {
+      "name": "complete_intent",
+      "description": "Mark the active intent completed and clear it. Call after a successful commit, passing commitSha so code blocks are captured.\n\nstatus: committed (default, local commit) | pushed | done | abandoned.\n\nYou MUST inspect the response:\n\n- success === true \u2014 done. If committedDecisionCount > 0, say N decisions were recorded; do NOT list them. If apiSyncDeferred, say the sync was deferred and will replay. If collisions is non-empty, relay it as an advisory coordination heads-up (collisions[].label + files) \u2014 the completion still succeeded. If deferredConflicts is non-empty, the completion ALSO succeeded; say \"N decision(s) need a disposition in the Kawa Code panel\" and do NOT re-run this tool.\n\n- success === false && reason === \"transient-failure\" \u2014 the intent stays active and nothing was lost. Report failedStage plus the error; retry once the cause clears, or abandon if it persists.\n\n- success === false with any other reason (e.g. \"resolution_required\", \"completion_locked\") \u2014 the intent stays active and nothing was written. `message` carries Kawa Code's instructions for the next step; follow them rather than retrying blindly.\n\nAutonomous sessions: deferredConflicts is not a blocking state \u2014 log and continue.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "Target intent to complete/abandon. When omitted, completes THIS session's current intent. When provided, targets that specific intent directly \u2014 this is how you force-close an intent that is not your current one (e.g. another session's). Completing an intent created by ANOTHER team member additionally requires humanApproved=true (see below)."
+          },
+          "commitSha": {
+            "type": "string",
+            "description": "The commit SHA (git) or revision id (svn) to associate with this intent (if already committed)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "committed",
+              "pushed",
+              "done",
+              "abandoned",
+              "superseded"
+            ],
+            "description": "The new status for the intent. Use \"committed\" after a commit, \"done\" when work is complete, \"abandoned\" to discard, \"superseded\" when another intent replaces this one."
+          },
+          "supersededBy": {
+            "type": "string",
+            "description": "Intent ID that supersedes this one. Required when status is \"superseded\"."
+          },
+          "humanApproved": {
+            "type": "boolean",
+            "description": "Set to true ONLY when the human has explicitly confirmed closing an intent created by ANOTHER team member. Required for that cross-author case; ignored for your own intents. NEVER set this on your own initiative \u2014 always ask the user first and only set it after they approve."
+          }
+        },
+        "required": [
+          "repoPath"
+        ]
+      }
+    },
+    {
+      "name": "update_intent",
+      "description": "Update an active intent's title, description, scope, or constraints.\n\nUse this to reformulate an intent as understanding evolves during work. Intents are\nliving documents \u2014 they should be updated to reflect what the work actually became,\nnot left as the initial guess. Common triggers for reformulation:\n- The real problem turned out to be different from the initial hypothesis\n- Scope expanded or narrowed during investigation\n- The approach changed after discovering constraints\n\nIf no intentId is provided, the currently active intent is updated.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "ID of the intent to update. If omitted, updates the currently active intent."
+          },
+          "title": {
+            "type": "string",
+            "description": "Updated title for the intent"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated description for the intent"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Updated constraints for this work"
+          },
+          "scope": {
+            "type": "object",
+            "description": "Updated scope for the intent"
+          }
+        },
+        "required": [
+          "repoPath"
+        ]
+      }
+    },
+    {
+      "name": "log_work",
+      "description": "DEPRECATED \u2014 trivial changes (typos, one-line fixes, obvious bugs, doc updates, config changes) should skip the intent workflow entirely: just make the change and commit, no intent needed. Do not call this tool. Kept available for backwards compatibility only and will be removed in a future release.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to repository root"
+          },
+          "title": {
+            "type": "string",
+            "description": "Short description of the work done"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "File paths modified (relative to repo root)"
+          }
+        },
+        "required": [
+          "repoPath",
+          "title"
+        ]
+      }
+    },
+    {
+      "name": "record_decision",
+      "description": "Silently record a decision point during development.\n\nCall this tool when you:\n- Choose between multiple alternatives (type: fork)\n- Try an approach that fails or is rejected (type: abandoned)\n- Find unexpected behavior or limitations (type: discovery)\n- Identify a hard constraint that must be respected (type: constraint)\n- Make an explicit trade-off between competing concerns (type: tradeoff)\n- Select an external library or dependency (type: dependency)\n\nDecisions can be **intent-scoped** (tied to a specific work unit) or **repo-scoped** (general knowledge like discoveries and constraints). Omit intentId for repo-scoped decisions.\n\nDecisions are accumulated silently during the session and presented for review before commit.\nThis creates a \"reasoning changelog\" that captures not just what was done, but why.\n\nIMPORTANT: Include constraintViolations when alternatives are rejected due to architectural constraints.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root (enables offline sync)"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "The intent ID this decision belongs to. Omit for repo-scoped decisions (discoveries, constraints) not tied to a specific work unit"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "fork",
+              "abandoned",
+              "discovery",
+              "constraint",
+              "tradeoff",
+              "dependency"
+            ],
+            "description": "Type of decision: fork (chose between alternatives), abandoned (tried and rejected), discovery (found unexpected behavior), constraint (identified hard requirement), tradeoff (made explicit trade-off), dependency (selected library/tool)"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Brief summary of the decision (< 100 chars recommended)"
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this decision was made"
+          },
+          "context": {
+            "type": "string",
+            "description": "What we were trying to accomplish when this decision was made"
+          },
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Other options that were considered"
+          },
+          "consequences": {
+            "type": "string",
+            "description": "Downstream implications of this decision"
+          },
+          "symptom": {
+            "type": "string",
+            "description": "Observable symptom that indicates this decision is relevant (e.g., error messages, runtime panics, unexpected behavior). Useful for discovery and constraint decisions."
+          },
+          "relatedFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "File paths affected by this decision"
+          },
+          "supersedes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Decision IDs that this one replaces. When a later decision supersedes an earlier one, pass the earlier decisionId(s) here so the evolve pipeline can track the lineage. Pass FULL decision IDs (36-char UUIDs) \u2014 a truncated 8-char prefix is rejected, because resolving it back would mean guessing which decision you meant. If you only have a prefix (e.g. read from a doc), look it up with get_decision_detail first and use the id it returns."
+          },
+          "constraintsChecked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Which architectural constraints were verified before this decision"
+          },
+          "constraintViolations": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Alternatives that were rejected due to constraint violations"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "user",
+              "agent",
+              "extractor",
+              "infer_history"
+            ],
+            "description": "Provenance: user (human-recorded), agent (AI deliberately recorded via this tool \u2014 the default), extractor (from thought-chain extraction), infer_history (from commit-history extraction). Most callers leave this as the default."
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "description": "Self-rated confidence in the decision. Meaningful only for extractor and infer_history sources \u2014 leave null for deliberate recordings."
+          },
+          "sourceThoughtIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Thought-chain entry IDs this record was extracted from. Only set by the extractor path."
+          },
+          "appliesWhen": {
+            "type": "string",
+            "description": "Trigger condition / \"How to apply\" \u2014 populate ONLY when the decision is plainly conditional (e.g. \"language is Go\", \"when running in production\", \"when working in module X\", \"when the error is ECONNRESET\"). Skip when the rule has no clean activation condition or when the rationale already implies universality. Treat applies_when as load-bearing context the LLM uses at recall time to decide whether the decision is relevant \u2014 not a soft hint. Strong-signal-only."
+          },
+          "surface": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pre-edit",
+                "intent-create",
+                "stop",
+                "recall"
+              ]
+            },
+            "description": "Which ceremony(ies) this decision should be surfaced at, controlling when it interrupts future work. Values: \"pre-edit\" (per-edit block via pre_edit_decision_check \u2014 for correctness/security constraints), \"intent-create\" (injected at intent-framing time \u2014 for design/scalability constraints that must shape the approach, not a keystroke), \"stop\" (once-per-turn Stop/review gate \u2014 aggregate/after-the-fact checks), \"recall\" (passive; only via get_relevant_context). Omit for ordinary decisions \u2014 empty means default type-based routing. Strong-signal-only: set it only when the decision genuinely belongs at a non-default ceremony."
+          },
+          "resolvedCollision": {
+            "type": "object",
+            "description": "Layer C audit \u2014 set ONLY when this decision records how you resolved a completion-time code collision (i.e. after complete_intent returned resolution_required). Links the decision to the live peer you yielded to or overrode."
+          }
+        },
+        "required": [
+          "repoPath",
+          "type",
+          "summary",
+          "rationale"
+        ]
+      }
+    },
+    {
+      "name": "get_session_decisions",
+      "description": "Get all decisions recorded in the current session for an intent.\n\nUse this before committing to review what decisions were captured during development.\nDecisions are presented for user review and can be edited or removed before being persisted.\n\nReturns:\n- intentId: The intent these decisions belong to\n- decisions: Array of decision points (summary-only \u2014 call get_decision_detail(decisionId) for full rationale/context/consequences/alternatives)\n- count: Number of decisions recorded",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "The intent ID to get decisions for"
+          }
+        },
+        "required": [
+          "repoPath",
+          "intentId"
+        ]
+      }
+    },
+    {
+      "name": "get_project_decisions",
+      "description": "ONE PAGE of the project's decisions across all intents, newest first \u2014 architectural choices, trade-offs, and the constraints they respected.\n\nMax 100 rows. If `hasMore`, you are holding a prefix, not the history: walk it with\n`offset`, or better, use get_relevant_context for the decisions that bear on your\ntask. For the whole corpus (export, audit), use Kawa Code, not this tool.\n\nReturns: decisions (this page, with intent context), count / totalCount / hasMore.\n\nEach decision is summary-only \u2014 call get_decision_detail(decisionId) for rationale/context/consequences/alternatives:\n- intentIds: owning intents (a decision can span several)\n- type: fork, abandoned, discovery, constraint, tradeoff, or dependency\n- summary, relatedFiles, constraintViolations",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Rows per page, 1-100 (default 100)."
+          },
+          "offset": {
+            "type": "number",
+            "description": "Rows to skip (default 0)."
+          }
+        },
+        "required": [
+          "repoPath"
+        ]
+      }
+    },
+    {
+      "name": "get_decision_detail",
+      "description": "Expand one decision to its full detail.\n\nRecall surfaces (get_relevant_context, get_project_decisions, get_session_decisions) return decisions summary-only to keep context lean. Use this to pull the full reasoning for a single decision you want to open \u2014 pay for detail only where you ask for it.\n\nInputs:\n- `decisionId`: the decision to expand (the `id` / `decisionId` from a recall result).\n\nReturns the decision's `rationale`, `context`, `consequences`, `alternatives`, `symptom`, `appliesWhen`, `surface`, and related metadata. `found: false` when the id is unknown in this repo.\n\nReferences come pre-resolved, so describe them by name and never by ID alone:\n- `supersededDecisions` \u2014 the supersession chain, nearest first. Each carries `summary` and a `depth` (1 = directly superseded by this decision, 2 = what *that* one superseded). Use `depth` to render the chain correctly: with two entries at depth 1 this decision replaced both, whereas depth 1 then 2 is a lineage. `supersededOlderCount` > 0 means older ancestors exist beyond the cap \u2014 say \"+N older\".\n- `intents` \u2014 the intent(s) that produced this decision, with titles.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "decisionId": {
+            "type": "string",
+            "description": "The decision ID to expand (from a recall result, e.g. get_relevant_context)"
+          }
+        },
+        "required": [
+          "repoPath",
+          "decisionId"
+        ]
+      }
+    },
+    {
+      "name": "edit_session_decision",
+      "description": "Edit or delete a decision in the current session.\n\nUse this when reviewing decisions before commit:\n- action: \"update\" - Modify the decision fields\n- action: \"delete\" - Remove the decision entirely\n\nOnly ephemeral (in-flight) session decisions are editable. Once a decision is\nsynced to Kawa Code, it is immutable \u2014 refine it instead by recording a new\ndecision with `supersedes: [<id>]`.\n\nThis allows users to curate their decision history before it's persisted.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "The intent ID the decision belongs to"
+          },
+          "decisionId": {
+            "type": "string",
+            "description": "The decision ID to edit or delete"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "update",
+              "delete"
+            ],
+            "description": "Action to perform: update modifies the decision, delete removes it"
+          },
+          "updates": {
+            "type": "object",
+            "description": "Partial fields to update (only for action=update)"
+          }
+        },
+        "required": [
+          "repoPath",
+          "intentId",
+          "decisionId",
+          "action"
+        ]
+      }
+    },
+    {
+      "name": "detect_intent_conflicts",
+      "description": "Find intents from other team members that potentially conflict with the active intent.\n\nWhen to use:\n- Before committing, to surface overlapping team work so the user can coordinate before merging.\n\nInputs of note:\n- `intentId`: the active intent to check against.\n- `minScore` (optional): minimum match score to include in results.\n\nReturns scored conflict candidates with:\n- `score`: how strongly the candidate matches (higher = more likely conflict).\n- `overlappingFiles`: files affected by both intents.\n- `decisions`: decisions attached to the conflicting intent.\n- `authorId`: opaque owner id \u2014 use it only to tell whether the intent is someone else's. Who they are is shown in Kawa Code, not here.\n\nThe list is informational \u2014 review candidates and their decisions to decide whether coordination is needed.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "intentId": {
+            "type": "string",
+            "description": "The active intent ID"
+          },
+          "minScore": {
+            "type": "number",
+            "description": "Minimum similarity score threshold (default: 0.5)"
+          }
+        },
+        "required": [
+          "repoPath",
+          "intentId"
+        ]
+      }
+    },
+    {
+      "name": "infer_history",
+      "description": "One-time-ish bootstrap: mine a repo's commit history (git or svn) into intents and decisions. Rare \u2014 use it to seed a repo that has no recorded history yet, or to extend coverage after many new commits. NOT part of the per-turn workflow.\n\nCosts real money and time, so it is a two-step call: run with estimateOnly (the default) to preview tokens/cost, show the user, then re-call with estimateOnly: false only if they agree. The run is asynchronous and reports progress in the Kawa Code app; it resumes automatically if interrupted.\n\nRe-run guard \u2014 do not defeat this casually. If the repo already has intents and the run cannot cleanly resume, or HEAD is not on the default branch, the call STOPS and returns needsDecision rather than running, because re-running blind risks duplicate intents. Show the user the reason and only re-call with force: true if they confirm. Prefer running on main/master.\n\nOmit commits to resume from the last run. See the README for the full parameter list.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "commits": {
+            "type": "number",
+            "description": "Number of recent commits to analyze. If omitted, the server resumes from the last commit infer_history processed for this repo (or falls back to 50 on first run). Mutually exclusive with `commitRange`."
+          },
+          "commitRange": {
+            "type": "string",
+            "description": "Optional range to process instead of the N most recent commits: a git revspec (\"sha1..sha2\", \"branch1..branch2\", \"sha1^!\" for one commit) or, for svn, \"r100:r200\" (\"r150\" for one revision). Useful for recovering from dropped batches or targeted backfills. Mutually exclusive with `commits`."
+          },
+          "contextIssues": {
+            "type": "boolean",
+            "description": "Include context issues from commit date range (requires gh/glab CLI)"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model slug used for the token/cost estimate only. It does NOT select the model the run uses \u2014 that is configured in the Kawa Code app."
+          },
+          "maxStories": {
+            "type": "number",
+            "description": "Maximum number of stories to analyze in this run (0 = unlimited)."
+          },
+          "allowCommitSplitting": {
+            "type": "boolean",
+            "description": "Allow splitting a single commit into multiple stories when it contains unrelated changes (recommended for repos with messy commit history)"
+          },
+          "estimateOnly": {
+            "type": "boolean",
+            "description": "If true (default), only estimate token cost without running the pipeline. Set to false to run the full pipeline."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Override the re-run guard. When the repo already has intents and infer_history cannot cleanly resume (missing/unreachable cursor), or when HEAD is not on the default branch, the run is stopped and a confirmation is requested. Set `force: true` to proceed anyway, accepting the duplicate-intent risk. Exact-commit duplicates are still skipped automatically; overlapping re-groupings are not. A forced run on a non-default branch additionally does NOT advance the resume cursor. Does not override a hard failure such as the desktop app being unreachable."
+          }
+        },
+        "required": [
+          "repoPath"
+        ]
+      }
+    },
+    {
+      "name": "get_resolution_context",
+      "description": "Resolve a live code collision with a peer BEFORE you write (Layer C resolution handoff).\n\nCall this when the Stop hook's collision report (or complete_intent's resolution_required gate) surfaced a live peer (a teammate or AI agent editing the same lines). Pass that collision's uid as peerUid and its overlapping ranges. You get back:\n- peerSnippet \u2014 the peer's actual (decrypted) code at the overlapping lines, so you can see what they wrote.\n- decisions \u2014 recorded reasoning attached to this file (region context).\n- guardrail \u2014 the policy you must follow when resolving:\n  \u2022 Never overwrite a peer's COMMITTED work \u2014 yield or merge. Only override an uncommitted live diff, and only with a recorded rationale.\n  \u2022 Your resolution is an ordinary git edit (revert/diff is the undo) \u2014 stay in your own working tree; build no bespoke undo.\n  \u2022 Before completing, record_decision(type=fork|tradeoff, \u2026) explaining how you resolved (and supersedes the peer's decision if you overrode it).\n  \u2022 Choose or synthesize ONE coherent result \u2014 never blindly interleave both diffs.\n\nThis is advisory and proactive (no lock). Use it to adapt your edit and avoid the conflict.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "peerUid": {
+            "type": "string",
+            "description": "The peer HAI whose live edits overlap \u2014 the `uid` of a collision from the Stop hook collision report."
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Path to the file being edited (relative to repoPath)"
+          },
+          "ranges": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "Overlapping [start, end] line ranges (from the collision) to fetch the peer code for."
+          },
+          "intentId": {
+            "type": "string",
+            "description": "Active intent ID (advisory). Auto-detected by Kawa Code when omitted."
+          }
+        },
+        "required": [
+          "repoPath",
+          "peerUid",
+          "filePath",
+          "ranges"
+        ]
+      }
+    },
+    {
+      "name": "arbiter_resolve",
+      "description": "Get Kawa Code's AI verdict for live code overlaps with peers \u2014 SUGGEST-ONLY, never writes. For each overlap ({peerUid, filePath, ranges} from the Stop collision report), Kawa decrypts the peer's version locally (zero-knowledge) and judges it compatible / auto_resolvable / conflict, with confidence, a perf/security risk read, and a tier (0 no-op \u00b7 1 trivially auto-appliable \u00b7 2 draft-and-confirm \u00b7 3 conflict). Use it to understand a forming conflict before acting. For a surfaced tier-2/3 overlap, call get_resolution_context to read the peer's actual code. To actually apply the safe tier, use arbiter_apply.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "intentId": {
+            "type": "string",
+            "description": "Active intent ID (advisory). Auto-detected by Kawa Code when omitted."
+          },
+          "overlaps": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "The overlaps to judge \u2014 each { peerUid, filePath, ranges } from the Stop collision report."
+          }
+        },
+        "required": [
+          "repoPath",
+          "overlaps"
+        ]
+      }
+    },
+    {
+      "name": "arbiter_apply",
+      "description": "Resolve live code overlaps and AUTO-APPLY the safe tier. Kawa judges \u2192 adversarially verifies \u2192 and, for the trivial tier only (high-confidence single-range merge that passes verify), writes the merge to your worktree, records a decision, and republishes. Writes happen ONLY in an agent-owned worktree (a linked git worktree); on a human checkout \u2014 or when a peer holds the file-set lock \u2014 it behaves like arbiter_resolve (suggest-only, no writes). Returns per-overlap outcomes { tier, applied, announcement, verifyIssue?, verdict }. Call it when you are ready to incorporate the result, then RE-READ any file it applied to (it changed on disk). For surfaced (not-applied) overlaps, use get_resolution_context to see the peer code and resolve manually.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "repoPath": {
+            "type": "string",
+            "description": "Local path to the repository root"
+          },
+          "repoOrigin": {
+            "type": "string",
+            "description": "Repository origin. Auto-detected from repoPath if not provided."
+          },
+          "intentId": {
+            "type": "string",
+            "description": "Active intent ID (advisory; the auto-resolution decision is recorded under it)."
+          },
+          "overlaps": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "The overlaps to resolve \u2014 each { peerUid, filePath, ranges } from the Stop collision report."
+          }
+        },
+        "required": [
+          "repoPath",
+          "overlaps"
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "activate_intent",
+      "evidence": "tool name: activate_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "activate_intent",
+      "evidence": "tool name: activate_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "arbiter_apply",
+      "evidence": "tool name: arbiter_apply; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "arbiter_apply",
+      "evidence": "tool name: arbiter_apply; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "arbiter_resolve",
+      "evidence": "tool name: arbiter_resolve; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "arbiter_resolve",
+      "evidence": "tool name: arbiter_resolve; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "check_active_intent",
+      "evidence": "tool name: check_active_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "check_active_intent",
+      "evidence": "tool name: check_active_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "complete_intent",
+      "evidence": "tool name: complete_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "complete_intent",
+      "evidence": "tool name: complete_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "complete_intent",
+      "evidence": "tool name: complete_intent; parameter 'intentId' schema: {\"description\": \"Target intent to complete/abandon. When omitted, completes THIS session's current intent. When provided, targets that specific intent directly \\u2014 this is how you force-close an intent that is not your current one (e.g. another session's). Completing an intent created by ANOTHER team member additionally requires humanApproved=true (see below).\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "create_and_activate_intent",
+      "evidence": "tool name: create_and_activate_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "create_and_activate_intent",
+      "evidence": "tool name: create_and_activate_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "create_and_activate_intent",
+      "evidence": "tool name: create_and_activate_intent; parameter 'pendingId' schema: {\"description\": \"Only after a pending_approval response: the pendingId it returned. Asks whether the user has decided. Pass the same title, description and repoPath as before.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "detect_intent_conflicts",
+      "evidence": "tool name: detect_intent_conflicts; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "detect_intent_conflicts",
+      "evidence": "tool name: detect_intent_conflicts; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "edit_session_decision",
+      "evidence": "tool name: edit_session_decision; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "edit_session_decision",
+      "evidence": "tool name: edit_session_decision; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_decision_detail",
+      "evidence": "tool name: get_decision_detail; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_decision_detail",
+      "evidence": "tool name: get_decision_detail; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_intents_for_file",
+      "evidence": "tool name: get_intents_for_file; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_intents_for_file",
+      "evidence": "tool name: get_intents_for_file; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_intents_for_file",
+      "evidence": "tool name: get_intents_for_file; parameter 'filePath' schema: {\"description\": \"Path to the file (relative to repo root)\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_project_decisions",
+      "evidence": "tool name: get_project_decisions; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_project_decisions",
+      "evidence": "tool name: get_project_decisions; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_relevant_context",
+      "evidence": "tool name: get_relevant_context; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_relevant_context",
+      "evidence": "tool name: get_relevant_context; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_resolution_context",
+      "evidence": "tool name: get_resolution_context; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_resolution_context",
+      "evidence": "tool name: get_resolution_context; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_resolution_context",
+      "evidence": "tool name: get_resolution_context; parameter 'filePath' schema: {\"description\": \"Path to the file being edited (relative to repoPath)\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_session_decisions",
+      "evidence": "tool name: get_session_decisions; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "get_session_decisions",
+      "evidence": "tool name: get_session_decisions; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "infer_history",
+      "evidence": "tool name: infer_history; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "list_team_intents",
+      "evidence": "tool name: list_team_intents; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "list_team_intents",
+      "evidence": "tool name: list_team_intents; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "log_work",
+      "evidence": "tool name: log_work; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "log_work",
+      "evidence": "tool name: log_work; parameter 'repoPath' schema: {\"description\": \"Local path to repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "record_decision",
+      "evidence": "tool name: record_decision; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "record_decision",
+      "evidence": "tool name: record_decision; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root (enables offline sync)\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "resume_intent",
+      "evidence": "tool name: resume_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "resume_intent",
+      "evidence": "tool name: resume_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "update_intent",
+      "evidence": "tool name: update_intent; parameter 'repoOrigin' schema: {\"description\": \"Repository origin. Auto-detected from repoPath if not provided.\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "CAP-003",
+      "severity": "MEDIUM",
+      "confidence": 0.8,
+      "tool_name": "update_intent",
+      "evidence": "tool name: update_intent; parameter 'repoPath' schema: {\"description\": \"Local path to the repository root\", \"type\": \"string\"}",
+      "fix": "Constrain path inputs to an allowlisted directory and validate them before use."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "activate_intent",
+      "evidence": "get their soft-delete cleared so the prior reasoning\\n  becomes visible",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "complete_intent",
+      "evidence": "\"resolution_required\", \"completion_locked\") \u2014 the intent stays",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "create_and_activate_intent",
+      "evidence": "done; the intent is active. Proceed.\\n- \"pending_approval\": the user",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "get_decision_detail",
+      "evidence": "both, whereas depth 1 then 2 is a lineage. `supersededOlderCount`",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "get_relevant_context",
+      "evidence": "full rationale/context/consequences of any decision you want",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "get_resolution_context",
+      "evidence": "supersedes the peer's decision if you overrode it).\\n  \u2022 Choose or synthesize",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "resume_intent",
+      "evidence": "decisions[], count, message }. resumed=false with a message when the id can't be activated.",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    }
+  ],
+  "score": 100,
+  "explanations": [
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "activate_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "activate_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "arbiter_apply",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "arbiter_apply",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "arbiter_resolve",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "arbiter_resolve",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "check_active_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "check_active_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "complete_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "complete_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "complete_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "create_and_activate_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "create_and_activate_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "create_and_activate_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "detect_intent_conflicts",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "detect_intent_conflicts",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "edit_session_decision",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "edit_session_decision",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_decision_detail",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_decision_detail",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_intents_for_file",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_intents_for_file",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_intents_for_file",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_project_decisions",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_project_decisions",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_relevant_context",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_relevant_context",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_resolution_context",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_resolution_context",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_resolution_context",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_session_decisions",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "get_session_decisions",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "infer_history",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "list_team_intents",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "list_team_intents",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "log_work",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "log_work",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "record_decision",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "record_decision",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "resume_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "resume_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "update_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "CAP-003",
+      "tool_name": "update_intent",
+      "pattern_id": "MCP-KB-007",
+      "title": "Path traversal",
+      "why_it_matters": "Traversal sequences can escape an intended directory boundary and reach unrelated files.",
+      "remediation": "Canonicalize paths, verify the resolved path remains under an allowlisted root, and reject traversal forms."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "activate_intent",
+      "pattern_id": "MCP-KB-010",
+      "title": "Context stuffing with long descriptions",
+      "why_it_matters": "Excessive tool metadata can crowd out relevant context and make malicious or important content harder to review.",
+      "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "complete_intent",
+      "pattern_id": "MCP-KB-010",
+      "title": "Context stuffing with long descriptions",
+      "why_it_matters": "Excessive tool metadata can crowd out relevant context and make malicious or important content harder to review.",
+      "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "create_and_activate_intent",
+      "pattern_id": "MCP-KB-011",
+      "title": "Tool behavior rug pull",
+      "why_it_matters": "A previously reviewed tool may become unsafe if its description or behavior changes after approval.",
+      "remediation": "Pin and verify tool metadata, surface changes for re-approval, and monitor behavior against reviewed versions."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "get_decision_detail",
+      "pattern_id": "MCP-KB-011",
+      "title": "Tool behavior rug pull",
+      "why_it_matters": "A previously reviewed tool may become unsafe if its description or behavior changes after approval.",
+      "remediation": "Pin and verify tool metadata, surface changes for re-approval, and monitor behavior against reviewed versions."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "get_relevant_context",
+      "pattern_id": "MCP-KB-010",
+      "title": "Context stuffing with long descriptions",
+      "why_it_matters": "Excessive tool metadata can crowd out relevant context and make malicious or important content harder to review.",
+      "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "get_resolution_context",
+      "pattern_id": "MCP-KB-011",
+      "title": "Tool behavior rug pull",
+      "why_it_matters": "A previously reviewed tool may become unsafe if its description or behavior changes after approval.",
+      "remediation": "Pin and verify tool metadata, surface changes for re-approval, and monitor behavior against reviewed versions."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "resume_intent",
+      "pattern_id": "MCP-KB-010",
+      "title": "Context stuffing with long descriptions",
+      "why_it_matters": "Excessive tool metadata can crowd out relevant context and make malicious or important content harder to review.",
+      "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
+    }
+  ],
+  "verdict": "FAIL",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 7,
+    "MEDIUM": 43,
+    "HIGH": 0,
+    "CRITICAL": 0
+  }
+}

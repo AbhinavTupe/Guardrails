@@ -1,0 +1,116 @@
+{
+  "server_command": "npx -y @achromat-ai/mcp-server@0.1.6",
+  "tools": [
+    {
+      "name": "achromat_recall",
+      "description": "Call this BEFORE you run a tool that policy might block (payments, corporate spend, credit decisions, claim and contract decisions, regulated filings, robot or plant commands, shell, SQL, web requests). It asks Achromat Machine Operational Memory whether a verified compliant version of this call already exists. It works immediately and needs no identity: without one it searches the public, approved lessons; once the user has registered an identity it also finds the user's own pending lessons. Pass the arguments you intend to send: the names of their keys (not the values) are what the semantic match uses. On a match you receive compliant_arguments, a steering_directive and the statutory anchor: use the whole compliant_arguments object as your template, keep any [VERIFIED_STATE] placeholders exactly as written, and change only your own operational values (amounts, routing numbers, file paths).\n\nCOVERAGE. Matching is exact on domain and tool_name. Lessons exist for these tool names, by domain: fintech: dispatch_wire, issue_credit_adverse_action, commit_corporate_spend, approve_expenditure, release_payment; industrial_iot: dispatch_manipulation, mutate_safety_parameter, adjust_plc_setpoint; devsecops: execute_command, run_sql_statement, http_request, run_pipeline_job, read_file, monitor_logs, modify_iam_policy, process_retrieved_content; contractual_eligibility: approve_eligibility_claim, confirm_eligibility, bind_contract_terms; compliance_provenance: submit_regulated_record, submit_filing, release_report. Use industrial_iot for robot and plant commands. A tool name that is not listed, such as bash, psql or postgres_query, returns no match because nothing was recorded for it, so use the listed name only when it really is the tool you are about to call. On no match, continue with achromat_calibrate if it is available, or proceed under your own checks.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "fintech",
+              "industrial_iot",
+              "devsecops",
+              "contractual_eligibility",
+              "compliance_provenance"
+            ],
+            "description": "The area the tool call belongs to."
+          },
+          "tool_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]*$",
+            "description": "The exact name of the tool you are about to call, for example dispatch_wire. Matching is exact on domain and tool name; lessons exist only for the names listed in the achromat_recall description, and any other name returns no match."
+          },
+          "task_description": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 1000,
+            "description": "What you are trying to do, in plain words, as you would write a ticket title (16 to 1000 characters). Name the concrete action and object. Leave out amounts, identifiers, dates and personal data. Use the same wording for the same task every time."
+          },
+          "arguments": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "REQUIRED. The arguments you intend to send to the tool, as a non-empty JSON object, using the key names the tool really uses. Only the names of the keys (and their nesting) are used for semantic matching, never the values, so the real key names make a recall find the right lesson; an invented or generic shape finds the wrong one or none. Never put secrets or credentials in it."
+          }
+        },
+        "required": [
+          "domain",
+          "tool_name",
+          "task_description",
+          "arguments"
+        ]
+      }
+    },
+    {
+      "name": "achromat_register_identity",
+      "description": "achromat_recall already works without an identity. An identity is needed only for achromat_calibrate (checking a call against live policy, which is how new lessons are made) and to see the user's own pending lessons. This tool creates one: it generates an Ed25519 key pair, completes a short proof of work (about a second), registers the public key with Achromat Machine Operational Memory, and saves the private key to a file that only this user can read. ASK THE USER FIRST and wait for a yes, because it writes a private key file on their machine and creates an identity on the service. Explain that the key never leaves the machine, that only the public half is sent, and that the file cannot be recovered if lost. Then call this tool with user_confirmed set to true. Afterwards achromat_calibrate becomes available and achromat_recall signs its requests.",
+      "input_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "user_confirmed": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set to true ONLY after the user has said yes to creating an identity. If they have not been asked, ask first and do not call this tool."
+          }
+        },
+        "required": [
+          "user_confirmed"
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "rule_id": "POI-004",
+      "severity": "HIGH",
+      "confidence": 0.85,
+      "tool_name": "achromat_recall",
+      "evidence": "or none. Never put secrets or credentials in it.",
+      "fix": "Remove hidden AI directives and references to sensitive files or credentials."
+    },
+    {
+      "rule_id": "POI-005",
+      "severity": "LOW",
+      "confidence": 0.5,
+      "tool_name": "achromat_recall",
+      "evidence": "domain and tool_name. Lessons exist for these tool names, by domain:",
+      "fix": "Shorten the description to 1000 characters or fewer and move details elsewhere."
+    }
+  ],
+  "score": 23,
+  "explanations": [
+    {
+      "rule_id": "POI-004",
+      "tool_name": "achromat_recall",
+      "pattern_id": "MCP-KB-017",
+      "title": "Secrets embedded in descriptions",
+      "why_it_matters": "Tool descriptions may be exposed to clients, logs, or model context and are not a safe place for credentials.",
+      "remediation": "Remove credentials from descriptions, rotate exposed secrets, and retrieve secrets through a protected mechanism."
+    },
+    {
+      "rule_id": "POI-005",
+      "tool_name": "achromat_recall",
+      "pattern_id": "MCP-KB-010",
+      "title": "Context stuffing with long descriptions",
+      "why_it_matters": "Excessive tool metadata can crowd out relevant context and make malicious or important content harder to review.",
+      "remediation": "Keep descriptions concise, enforce reasonable size limits, and review unusually large metadata."
+    }
+  ],
+  "verdict": "REVIEW",
+  "severity_counts": {
+    "INFO": 0,
+    "LOW": 1,
+    "MEDIUM": 0,
+    "HIGH": 1,
+    "CRITICAL": 0
+  }
+}
