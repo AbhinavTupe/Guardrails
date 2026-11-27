@@ -8,15 +8,19 @@ mkdir sandbox-empty && python scripts/scan_public.py --i-understand
 ```
 
 This launches the pinned third-party MCP servers; probes are disabled.
-Review the generated `docs/findings.md` and `docs/findings/*.json`, then commit them:
+Review the generated `docs/findings.md` and target reports in
+`docs/findings/*.json`, then commit them. Testbed reports are kept separately
+under `docs/findings/testbed/` and are excluded from the public report:
 
 ```sh
 git add docs/findings* && git commit -m "Update public scan findings"
 ```
 
 To re-scan selected target names, pass a comma-separated `--only` list. The report
-is rebuilt from every JSON file in `docs/findings/`, preserving findings for
-targets not included in that run:
+is rebuilt only from top-level JSON files whose names match entries in
+`docs/targets.json`, preserving findings for targets not included in that run.
+Failure categories and their evidence can be documented in
+`docs/failure_notes.json`:
 
 ```sh
 python scripts/scan_public.py --i-understand --only name1,name2

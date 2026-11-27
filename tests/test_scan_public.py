@@ -11,6 +11,8 @@ from scripts.scan_public import (
     build_minimal_env,
     build_totals,
     classify_failure_reason,
+    get_failure_evidence,
+    get_failure_reason,
     load_saved_results,
     main,
     prepare_relative_directories,
@@ -52,7 +54,8 @@ def test_table_builder_handles_success_error_and_timeout() -> None:
     assert "error" in table
     assert "timeout" in table
     assert "| ok" in table
-    assert "Failure reason" in table
+    assert "Failure category" in table
+    assert "Failure evidence" in table
 
 
 def test_totals_math() -> None:
@@ -66,7 +69,7 @@ def test_totals_math() -> None:
     markdown = build_findings_markdown(results)
     assert "| 3 | 2 | 1 | 50.0% |" in markdown
     assert "% with HIGH+ (enumerated servers denominator)" in markdown
-    assert "| timeout | 1 |" in markdown
+    assert "| unclassified | 1 |" in markdown
 
 
 def test_report_groups_all_rules_and_classifies_failure_reasons() -> None:
@@ -91,10 +94,57 @@ def test_report_groups_all_rules_and_classifies_failure_reasons() -> None:
 
     assert "RULE-0 x 2" in markdown
     assert "| bad-protocol | - | - | failed |" in markdown
-    assert "| not an MCP server (protocol error) | 1 |" in markdown
+    assert "| unclassified | 2 |" in markdown
     assert "| blocked by sandbox policy | 1 |" in markdown
     assert "| network error | 1 |" in markdown
-    assert "| launch error | 1 |" in markdown
+
+
+def test_failure_notes_override_categories_and_findings_are_target_scoped(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    findings_dir = tmp_path / "findings"
+    findings_dir.mkdir()
+    (findings_dir / "known.json").write_text(
+        '{"name":"known","error":"could not resolve package index"}',
+        encoding="utf-8",
+    )
+    (findings_dir / "not-a-target.json").write_text(
+        '{"name":"not-a-target","error":"launch failed"}',
+        encoding="utf-8",
+    )
+    testbed_dir = findings_dir / "testbed"
+    testbed_dir.mkdir()
+    (testbed_dir / "vuln_shell.json").write_text(
+        '{"name":"vuln_shell","tools":[],"findings":[]}',
+        encoding="utf-8",
+    )
+    notes_path = tmp_path / "failure_notes.json"
+    notes_path.write_text(
+        '{"known":{"category":"requires credentials","evidence":"Requires API_TOKEN."}}',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(scan_public, "FINDINGS_DIR", findings_dir)
+    monkeypatch.setattr(scan_public, "FAILURE_NOTES_PATH", notes_path)
+    monkeypatch.setattr(
+        scan_public,
+        "load_targets",
+        lambda: [{"name": "known", "command": "fake", "source_url": "", "install_note": ""}],
+    )
+
+    results = load_saved_results()
+
+    assert [item.name for item in results] == ["known"]
+    assert get_failure_reason(results[0]) == "requires credentials"
+    assert get_failure_evidence(results[0]) == "Requires API_TOKEN."
+
+
+def test_unnoted_failures_use_allowed_automatic_categories() -> None:
+    assert get_failure_reason(TargetResult("offline", error="ECONNRESET")) == "network error"
+    assert (
+        get_failure_reason(TargetResult("unknown", error="launch failed"))
+        == "unclassified"
+    )
 
 
 @pytest.mark.parametrize(

@@ -1,0 +1,66 @@
+{
+  "git": {
+    "category": "network error",
+    "evidence": "uv could not reach PyPI while resolving the package."
+  },
+  "fetch": {
+    "category": "network error",
+    "evidence": "uv could not reach PyPI while resolving the package."
+  },
+  "time": {
+    "category": "network error",
+    "evidence": "uv could not reach PyPI while resolving the package."
+  },
+  "ai.glassflow/tares": {
+    "category": "network error",
+    "evidence": "uv could not reach PyPI while resolving the package."
+  },
+  "ai.agentutility/mcp-browser-workflow": {
+    "category": "requires credentials",
+    "evidence": "Startup requires the X402_PRIVATE_KEY environment variable."
+  },
+  "ai.agentutility/mcp-mediakit": {
+    "category": "requires credentials",
+    "evidence": "Startup requires the X402_PRIVATE_KEY environment variable."
+  },
+  "ai.haymon/dbmcp": {
+    "category": "incompatible platform",
+    "evidence": "The package requires glibc, which is unavailable on the target platform."
+  },
+  "ai.keepstate/ks": {
+    "category": "blocked by sandbox policy",
+    "evidence": "The package install script was blocked by sandbox policy."
+  },
+  "ai.kadmo/kadmo-agent": {
+    "category": "launch command incomplete",
+    "evidence": "The CLI requires an mcp/stdio argument that is absent from the launch command."
+  },
+  "ai.huddo/huddo": {
+    "category": "launch command incomplete",
+    "evidence": "The CLI requires an mcp/stdio argument that is absent from the launch command."
+  },
+  "ai.ankimcp/anki-mcp-server": {
+    "category": "launch command incomplete",
+    "evidence": "The CLI requires an mcp/stdio argument that is absent from the launch command."
+  },
+  "ai.cappz/cappz-market": {
+    "category": "CLI printed help, not MCP",
+    "evidence": "The launched CLI printed help instead of starting an MCP server."
+  },
+  "ai.hypaware/hypaware": {
+    "category": "CLI printed help, not MCP",
+    "evidence": "The launched CLI printed help instead of starting an MCP server."
+  },
+  "ai.aquex/stage1": {
+    "category": "CLI printed help, not MCP",
+    "evidence": "The launched CLI printed help instead of starting an MCP server."
+  },
+  "ai.memcell/memcell": {
+    "category": "unclassified",
+    "evidence": "The saved scan error is: MCP server launch or protocol error: unhandled errors in a TaskGroup (1 sub-exception)."
+  },
+  "ai.counterparts/memory": {
+    "category": "unclassified",
+    "evidence": "The saved scan error is: MCP server launch or protocol error: unhandled errors in a TaskGroup (1 sub-exception)."
+  }
+}

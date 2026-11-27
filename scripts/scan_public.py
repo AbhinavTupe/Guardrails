@@ -24,14 +24,17 @@ ROOT = Path(__file__).resolve().parents[1]
 TARGETS_PATH = ROOT / "docs" / "targets.json"
 FINDINGS_DIR = ROOT / "docs" / "findings"
 REPORT_PATH = ROOT / "docs" / "findings.md"
+FAILURE_NOTES_PATH = ROOT / "docs" / "failure_notes.json"
 ENUMERATION_TIMEOUT_SECONDS = 120.0
 TARGET_TIMEOUT_SECONDS = 150.0
-FAILURE_REASONS = (
-    "timeout",
-    "not an MCP server (protocol error)",
-    "launch error",
-    "blocked by sandbox policy",
+FAILURE_CATEGORIES = (
     "network error",
+    "requires credentials",
+    "incompatible platform",
+    "blocked by sandbox policy",
+    "launch command incomplete",
+    "CLI printed help, not MCP",
+    "unclassified",
 )
 WARNING = (
     "WARNING: This launches third-party code. Run only in a sandbox; "
@@ -80,6 +83,7 @@ class TargetResult:
     error: str | None = None
     timed_out: bool = False
     failure_reason: str | None = None
+    failure_evidence: str | None = None
 
 
 def scrub_text(text: str) -> str:
@@ -193,25 +197,34 @@ def classify_failure_reason(error: str | None, timed_out: bool = False) -> str:
 def get_failure_reason(item: TargetResult) -> str:
     if item.result is not None:
         return "-"
-    if item.failure_reason in FAILURE_REASONS:
+    if item.failure_reason in FAILURE_CATEGORIES:
         return item.failure_reason
-    return classify_failure_reason(item.error, item.timed_out)
+    automatic_reason = item.failure_reason or classify_failure_reason(item.error, item.timed_out)
+    if automatic_reason in {"network error", "blocked by sandbox policy"}:
+        return automatic_reason
+    return "unclassified"
+
+
+def get_failure_evidence(item: TargetResult) -> str:
+    if item.result is not None:
+        return "-"
+    return scrub_text(item.failure_evidence or item.error or "No error details recorded")
 
 
 def build_markdown_table(results: list[TargetResult]) -> str:
     lines = [
         (
             "| Server | Tools found | Score | Verdict | CRITICAL | HIGH | "
-            "MEDIUM | LOW | INFO | Rules (count) | Failure reason |"
+            "MEDIUM | LOW | INFO | Rules (count) | Failure category | Failure evidence |"
         ),
-        "|---|---:|---:|---|---:|---:|---:|---:|---:|---|---|",
+        "|---|---:|---:|---|---:|---:|---:|---:|---:|---|---|---|",
     ]
     for item in results:
         if item.result is None:
             status = "timeout" if get_failure_reason(item) == "timeout" else "failed"
             lines.append(
                 f"| {scrub_text(item.name)} | - | - | {status} | - | - | - | - | - | "
-                f"- | {get_failure_reason(item)} |"
+                f"- | {get_failure_reason(item)} | {get_failure_evidence(item)} |"
             )
             continue
         result = item.result
@@ -220,7 +233,7 @@ def build_markdown_table(results: list[TargetResult]) -> str:
             f"| {scrub_text(item.name)} | {len(result.tools)} | {result.score} | "
             f"{result.verdict} | {counts['CRITICAL']} | {counts['HIGH']} | "
             f"{counts['MEDIUM']} | {counts['LOW']} | {counts['INFO']} | "
-            f"{rule_counts(result)} | - |"
+            f"{rule_counts(result)} | - | - |"
         )
     return "\n".join(lines)
 
@@ -240,19 +253,19 @@ def build_totals(results: list[TargetResult]) -> tuple[int, int, int, float]:
 
 def build_totals_markdown(results: list[TargetResult]) -> str:
     scanned, enumerated, failed, percent = build_totals(results)
-    reason_counts = {reason: 0 for reason in FAILURE_REASONS}
+    reason_counts = {category: 0 for category in FAILURE_CATEGORIES}
     for item in results:
         if item.result is None:
             reason_counts[get_failure_reason(item)] += 1
     failures = "\n".join(
-        f"| {reason} | {reason_counts[reason]} |" for reason in FAILURE_REASONS
+        f"| {category} | {reason_counts[category]} |" for category in FAILURE_CATEGORIES
     )
     return (
         "\n\n## Totals\n\n"
         "| Scanned | Enumerated | Failed | % with HIGH+ (enumerated servers denominator) |\n"
         "|---:|---:|---:|---:|\n"
         f"| {scanned} | {enumerated} | {failed} | {percent:.1f}% |\n\n"
-        "### Failure reasons\n\n"
+        "### Failure breakdown\n\n"
         "| Category | Servers |\n|---|---:|\n"
         f"{failures}"
     )
@@ -379,12 +392,16 @@ def load_saved_results() -> list[TargetResult]:
         ): str(target["name"])
         for target in load_targets()
     }
+    failure_notes = load_failure_notes()
     results: list[TargetResult] = []
     for path in sorted(FINDINGS_DIR.glob("*.json")):
+        if path.stem not in target_names:
+            continue
         payload = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise ValueError(f"{path} must contain a JSON object")
-        name = str(payload.get("name", target_names.get(path.stem, path.stem)))
+        name = target_names[path.stem]
+        note = failure_notes.get(name)
         if "error" in payload:
             error = str(payload["error"])
             timed_out = payload.get("failure_reason") == "timeout"
@@ -393,8 +410,13 @@ def load_saved_results() -> list[TargetResult]:
                     name=name,
                     error=error,
                     timed_out=timed_out,
-                    failure_reason=str(payload.get("failure_reason", ""))
-                    or classify_failure_reason(error, timed_out),
+                    failure_reason=(
+                        note["category"]
+                        if note is not None
+                        else str(payload.get("failure_reason", ""))
+                        or classify_failure_reason(error, timed_out)
+                    ),
+                    failure_evidence=note["evidence"] if note is not None else error,
                 )
             )
             continue
@@ -439,6 +461,24 @@ def load_saved_results() -> list[TargetResult]:
         )
         results.append(TargetResult(name=name, result=result))
     return results
+
+
+def load_failure_notes(path: Path | None = None) -> dict[str, dict[str, str]]:
+    if path is None:
+        path = FAILURE_NOTES_PATH
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("docs/failure_notes.json must contain a JSON object")
+    notes: dict[str, dict[str, str]] = {}
+    for server, note in data.items():
+        if not isinstance(server, str) or not isinstance(note, dict):
+            raise ValueError("Each failure note must map a server name to an object")
+        category = note.get("category")
+        evidence = note.get("evidence")
+        if category not in FAILURE_CATEGORIES or not isinstance(evidence, str) or not evidence:
+            raise ValueError(f"Failure note for {server} requires a valid category and evidence")
+        notes[server] = {"category": category, "evidence": evidence}
+    return notes
 
 
 def load_targets(path: Path = TARGETS_PATH) -> list[dict[str, object]]:
